@@ -27,7 +27,7 @@ data(iris)
 df <- subset(iris,select=-Species)
 labels <- subset(iris,select=Species)
 
-m <- map.build(df,labels,xdim=15,ydim=10,train=100000)
+m <- map.build(df,labels,xdim=15,ydim=10,train=10000)
 
 map.starburst(m)
 }
