@@ -38,10 +38,11 @@
 ###
 
 # load libraries
-loadNamespace("fields")
-loadNamespace("graphics")
-loadNamespace("ggplot2")
-loadNamespace("hash")
+library("som")
+library("fields")
+library("graphics")
+library("ggplot2")
+library("hash")
 
 ### constructor ###
 
@@ -92,19 +93,32 @@ map.build <- function(data,
   if (!is.null(seed) && !test.integer(seed))
     stop("seed value has to be a positive integer value")
 
+  if (!is.null(seed))
+    set.seed(seed)
+
   if (!test.integer(train))
     stop("train value has to be a positive integer value")
 
-  # train the neural network
-  neurons <- vsom.f(data,
-                    xdim=xdim,
-                    ydim=ydim,
-                    alpha=alpha,
-                    train=train,
-                    seed=seed)
+  # compute the initial neighborhood radius
+  r <- sqrt(xdim^2 + ydim^2)
 
-  # make the neuron data a data frame
-  neurons <- data.frame(neurons)
+  # train the neural network
+  m <- som(data,
+          xdim=xdim,
+          ydim=ydim,
+          init="random",
+          alpha=c(alpha,alpha),
+          alphaType="linear",
+          neigh="bubble",
+          topol="rect",
+          radius=c(r,r),
+          rlen=c(1,train))
+
+  # the 'som' package does something really annoying with attributes
+  # for the neuron matrix, we get rid of that by casting the neurons
+  # as a new matrix/dataframe
+  neurons <- data.frame(matrix(m$code,xdim*ydim,ncol(data)))
+  # inherit meta data from the input data
   names(neurons) <- names(data)
 
   # construct the map object
