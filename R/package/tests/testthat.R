@@ -1,4 +1,4 @@
 library(testthat)
-library(popsom)
+library(popsom7)
 
-test_check("popsom")
+test_check("popsom7")

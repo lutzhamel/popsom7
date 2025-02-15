@@ -198,7 +198,7 @@ map.build <- function(data,
 #   a summary object of type 'summary.map'
 map.summary <- function(map, verb=TRUE)
 {
-  if (class(map) != "map")
+  if (!inherits(map,"map"))
     stop("first argument is not a map object.")
 
   value <- list()
@@ -259,7 +259,7 @@ map.summary <- function(map, verb=TRUE)
 # - map is an object of type 'map'
 map.starburst <- function(map)
 {
-  if (class(map) != "map")
+  if (!inherits(map,"map"))
     stop("first argument is not a map object.")
 
   plot.heat(map)
@@ -275,7 +275,7 @@ map.starburst <- function(map)
 # - a vector containing the significance for each feature
 map.significance <- function(map,graphics=TRUE,feature.labels=TRUE)
 {
-  if (class(map) != "map")
+  if (!inherits(map,"map"))
     stop("first argument is not a map object.")
 
   data.df <- data.frame(map$data)
@@ -335,7 +335,7 @@ map.significance <- function(map,graphics=TRUE,feature.labels=TRUE)
 map.marginal <- function(map,marginal)
 {
   # ensure that map is a 'map' object
-  if (class(map) != "map")
+  if (!inherits(map,"map"))
     stop("first argument is not a map object.")
 
   # check if the second argument is of type character
@@ -381,7 +381,7 @@ map.marginal <- function(map,marginal)
 # - a vector of labels
 map.fitted <- function(map)
 {
-  if (class(map) != "map")
+  if (!inherits(map,"map"))
     stop("first argument is not a map object.")
 
   nobs <- length(map$fitted.obs)
@@ -697,7 +697,7 @@ map.fitted.obs <- function(map)
 # - return value is the estimated topographic accuracy
 map.topo <- function(map,k=50,conf.int=.95,verb=FALSE,interval=TRUE)
 {
-  if (class(map) != "map")
+  if (!inherits(map,"map"))
       stop("first argument is not a map object.")
 
   # data.df is a matrix that contains the training data
@@ -744,7 +744,7 @@ map.topo <- function(map,k=50,conf.int=.95,verb=FALSE,interval=TRUE)
 map.embed.vm <- function(map,conf.int=.95,verb=FALSE)
 {
 
-    if (class(map) != "map")
+    if (!inherits(map,"map"))
         stop("first argument is not a map object.")
 
     # map.df is a dataframe that contains the neurons
@@ -792,7 +792,7 @@ map.embed.vm <- function(map,conf.int=.95,verb=FALSE)
 # map.embed using the kolgomorov-smirnov test
 map.embed.ks <- function(map,conf.int=.95,verb=FALSE)
 {
-  if (class(map) != "map")
+  if (!inherits(map,"map"))
   {
       stop("first argument is not a map object.")
   }
@@ -963,7 +963,7 @@ coordinate <- function(map,rowix)
 # rowix -- convert from a map xy-coordinate to a row index
 rowix <- function(map,cd)
 {
-    if (class(cd) != "coord")
+    if (!inherits(cd,"coord"))
       stop("expected a coord object")
 
     rix <- cd$x + (cd$y-1)*map$xdim
@@ -1635,52 +1635,6 @@ df.mean.test <- function(df1,df2,conf = .95)
   list(diff=mean.diff.v,
        conf.int.lo=mean.confintlo.v,
        conf.int.hi=mean.confinthi.v)
-}
-
-
-# vsom.f - vectorized and optimized version of the stochastic
-# SOM training algorithm written in Fortran90
-vsom.f <- function(data,xdim,ydim,alpha,train,seed)
-{
-    ### some constants
-    dr <- nrow(data)
-    dc <- ncol(data)
-    nr <- xdim*ydim
-    nc <- dc # dim of data and neurons is the same
-
-    ### build and initialize the matrix holding the neurons
-    if (!is.null(seed))
-    {
-        set.seed(seed)
-    }
-    else
-    {
-        # send a -1 to Fortran function to indicate no seed present
-        seed <- -1
-    }
-    cells <- nr * nc        # no. of neurons times number of data dimensions
-    v <- runif(cells,-1,1)  # vector with small init values for all neurons
-    # NOTE: each row represents a neuron, each column represents a dimension.
-    neurons <- matrix(v,nrow=nr,ncol=nc)  # rearrange the vector as matrix
-
-    result <- .Fortran("vsom",
-                       as.single(neurons),
-                       as.single(data.matrix(data)),
-                       as.integer(dr),
-                       as.integer(dc),
-                       as.integer(xdim),
-                       as.integer(ydim),
-                       as.single(alpha),
-                       as.integer(train),
-                       as.integer(seed),
-                       PACKAGE="popsom")
-
-    # unpack the structure and list in result[1]
-    v <- result[1]
-    # rearrange the result vector as matrix
-    neurons <- matrix(v[[1]],nrow=nr,ncol=nc,byrow=FALSE)
-
-    neurons
 }
 
 # get.unique.centroids -- a list of unique centroid locations on the map
