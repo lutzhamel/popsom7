@@ -1,11 +1,12 @@
-# Popsom
-### An Efficient Implementation of Kohonen's Self-Organizing Maps (SOMs) with Starburst Visualizations
+# Popsom7
 
-![](https://raw.githubusercontent.com/lutzhamel/popsom/master/map.png)
+### A User-friendly Implementation of Kohonen's Self-Organizing Maps
 
-Kohonen's self-organizing maps with a number of distinguishing features:
+![](https://raw.githubusercontent.com/lutzhamel/popsom7/master/map.png)
 
-1. [An efficient, single threaded, stochastic training algorithm](https://doi.org/10.1007/978-3-030-01057-7_60) inspired by ideas from tensor algebra.  No special accelerator hardware required.
+An implementation of Kohonen's self-organizing maps with a number of distinguishing features:
+
+1. An easy to use interface for building and evaluating self-organizing maps.
 
 2. Automatic centroid detection and [visualization using starbursts](http://citeseerx.ist.psu.edu/viewdoc/citations;jsessionid=ADD8A6B07C6E90AC162CC1BCA57E996E?doi=10.1.1.217.6666).
 
@@ -15,4 +16,4 @@ Kohonen's self-organizing maps with a number of distinguishing features:
 
 For an example usage case check [here](https://www.kaggle.com/lutzhamel/customer-segmentation-with-soms).
 
-For the Popsom description as part of CRAN check [here](https://CRAN.R-project.org/package=popsom).
+For the Popsom description as part of CRAN check [here](https://CRAN.R-project.org/package=popsom7).
