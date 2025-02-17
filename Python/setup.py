@@ -5,7 +5,7 @@ setup(
     version='7.0.0',
     author='Lutz Hamel',
     author_email='lutz.hamel@gmail.com',
-    description='A package for constructing and evaluating self-organizing maps.',
+    description="A User-friendly Implementation of Kohonen's Self-Organizing Maps",
     long_description=open('README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
     url='https://github.com/lutzhamel/popsom7',  # update with your repository URL
