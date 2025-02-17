@@ -29,10 +29,10 @@ data = pd.read_csv('iris.csv')
 
 # Optionally, separate out labels if available
 labels = data[['Species']]
-data = data.drop(columns=['Species'])
+data = data.drop(columns=['id','Species'])
 
-# Build the SOM 
-som_map = maputils.map_build(data, labels=labels, xdim=10, ydim=5, alpha=0.3, train=1000, normalize=True, seed=42)
+# Build the SOM
+som_map = maputils.map_build(data, labels=labels, xdim=15, ydim=10, alpha=0.3, train=10000, seed=42)
 
 # Print a summary of the map
 maputils.map_summary(som_map)

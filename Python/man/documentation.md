@@ -82,6 +82,9 @@ An object of type `map` with the following member fields:
 ### Examples
 
 ```python
+import pandas as pd
+from popsom7 import maputils
+
 ## training data
 iris = pd.read_csv('iris.csv')
 print(iris.head())
@@ -91,13 +94,13 @@ X = iris.drop(columns=['id','Species'])
 y = iris[['Species']]
 
 ## build a map
-m = map_build(X, y, xdim = 15, ydim = 10, train = 10000, seed = 42)
+m = maputils.map_build(X, y, xdim = 15, ydim = 10, train = 10000, seed = 42)
 
 ## look at the characteristics of the map
-map_summary(m)
+maputils.map_summary(m)
 
 ## plot the map
-map_starburst(m)
+maputils.map_starburst(m)
 ```
 
 ---
@@ -138,6 +141,9 @@ The structure of the return value depends on the `verb` switch.
 ### Examples
 
 ```python
+import pandas as pd
+from popsom7 import maputils
+
 ## training data
 iris = pd.read_csv('iris.csv')
 print(iris.head())
@@ -147,10 +153,10 @@ X = iris.drop(columns=['id','Species'])
 y = iris[['Species']]
 
 ## build a map
-m = map_build(X, y, xdim = 15, ydim = 10, train = 1000)
+m = maputils.map_build(X, y, xdim = 15, ydim = 10, train = 1000)
 
 ## map quality
-map_convergence(m)
+maputils.map_convergence(m)
 ```
 
 ---
@@ -178,6 +184,9 @@ A vector of predicted labels, one for each observation in the training data.
 ### Examples
 
 ```python
+import pandas as pd
+from popsom7 import maputils
+
 ## training data
 iris = pd.read_csv('iris.csv')
 print(iris.head())
@@ -186,9 +195,9 @@ print(iris.head())
 X = iris.drop(columns=['id','Species'])
 y = iris[['Species']]
 
-m = map_build(X, y, xdim = 15, ydim = 10, train = 10000)
+m = maputils.map_build(X, y, xdim = 15, ydim = 10, train = 10000)
 
-fitted_labels = map_fitted(m)
+fitted_labels = maputils.map_fitted(m)
 ```
 
 ---
@@ -213,6 +222,9 @@ map_marginal(map, marginal)
 ### Examples
 
 ```python
+import pandas as pd
+from popsom7 import maputils
+
 ## training data
 iris = pd.read_csv('iris.csv')
 print(iris.head())
@@ -222,10 +234,10 @@ X = iris.drop(columns=['id','Species'])
 y = iris[['Species']]
 
 ## build a map
-m = map_build(X, y, xdim = 15, ydim = 10, train = 10000)
+m = maputils.map_build(X, y, xdim = 15, ydim = 10, train = 10000)
 
 ## display marginal distribution of dimension 1
-map_marginal(m, 1)
+maputils.map_marginal(m, 1)
 ```
 
 ---
@@ -256,6 +268,9 @@ A data frame with (x,y)-positions. The data frame has two columns:
 ### Examples
 
 ```python
+import pandas as pd
+from popsom7 import maputils
+
 ## training data
 iris = pd.read_csv('iris.csv')
 print(iris.head())
@@ -264,9 +279,9 @@ print(iris.head())
 X = iris.drop(columns=['id','Species'])
 y = iris[['Species']]
 
-m = map_build(X, y, xdim = 15, ydim = 10, train = 10000)
+m = maputils.map_build(X, y, xdim = 15, ydim = 10, train = 10000)
 
-positions = map_position(m, X)
+positions = maputils.map_position(m, X)
 ```
 
 ---
@@ -297,6 +312,9 @@ A data frame with classification results. The data frame has two columns:
 ### Examples
 
 ```python
+import pandas as pd
+from popsom7 import maputils
+
 ## training data
 iris = pd.read_csv('iris.csv')
 print(iris.head())
@@ -305,9 +323,9 @@ print(iris.head())
 X = iris.drop(columns=['id','Species'])
 y = iris[['Species']]
 
-m = map_build(X, y, xdim = 15, ydim = 10, train = 10000)
+m = maputils.map_build(X, y, xdim = 15, ydim = 10, train = 10000)
 
-y_predict = map_predict(m, X)
+y_predict = maputils.map_predict(m, X)
 ```
 
 ---
@@ -344,6 +362,9 @@ If `graphics = False`, a vector containing the significance for each feature is 
 ### Examples
 
 ```python
+import pandas as pd
+from popsom7 import maputils
+
 ## training data
 iris = pd.read_csv('iris.csv')
 print(iris.head())
@@ -352,10 +373,10 @@ print(iris.head())
 X = iris.drop(columns=['id','Species'])
 y = iris[['Species']]
 
-m = map_build(X, y, xdim = 15, ydim = 10, train = 10000)
+m = maputils.map_build(X, y, xdim = 15, ydim = 10, train = 10000)
 
 ## Display the relative feature significance graphically
-map_significance(m)
+maputils.map_significance(m)
 ```
 
 ---
@@ -384,6 +405,9 @@ Generate a starburst representation of the clusters on the heat map for the self
 ### Examples
 
 ```python
+import pandas as pd
+from popsom7 import maputils
+
 ## training data
 iris = pd.read_csv('iris.csv')
 print(iris.head())
@@ -392,9 +416,9 @@ print(iris.head())
 X = iris.drop(columns=['id','Species'])
 y = iris[['Species']]
 
-m = map_build(X, y, xdim = 15, ydim = 10, train = 10000)
+m = maputils.map_build(X, y, xdim = 15, ydim = 10, train = 10000)
 
-map_starburst(m)
+maputils.map_starburst(m)
 ```
 
 ---
@@ -434,6 +458,9 @@ If `verb` is `True`, the `summary_map` object is formatted and printed to the sc
 ### Examples
 
 ```python
+import pandas as pd
+from popsom7 import maputils
+
 ## training data
 iris = pd.read_csv('iris.csv')
 print(iris.head())
@@ -443,10 +470,10 @@ X = iris.drop(columns=['id','Species'])
 y = iris[['Species']]
 
 ## build a map
-m = map_build(X, y, xdim = 15, ydim = 10, train = 10000)
+m = maputils.map_build(X, y, xdim = 15, ydim = 10, train = 10000)
 
 ## compute a summary object and display it
-s = map_summary(m, verb = False)
+s = maputils.map_summary(m, verb = False)
 print(s)
 ```
 
