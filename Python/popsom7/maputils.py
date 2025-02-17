@@ -22,7 +22,7 @@ The main utilities available in this file are:
     map_marginal ----- displays a density plot of a training dataframe dimension
                          overlayed with the neuron density for that same dimension or index.
     
-License: GNU General Public License
+License: MIT License
 """
 
 import numpy as np
