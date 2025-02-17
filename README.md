@@ -14,10 +14,12 @@ An implementation of Kohonen's self-organizing maps with a number of distinguish
 
 4. A number of easily accessible quality metrics for the self organizing map and the centroid based cluster model.
 
-Worked examples: 
+Other documents: 
 
 * For a worked Python example check this [notebook on Kaggle](https://www.kaggle.com/code/lutzhamel/clustering-with-python-popsom7).
 
 * For an example in R check this [notebook on Kaggle](https://www.kaggle.com/lutzhamel/customer-segmentation-with-soms).
 
-For the Popsom description as part of CRAN check [here](https://CRAN.R-project.org/package=popsom7).
+* The Python documentation can be found [here](https://github.com/lutzhamel/popsom7/blob/master/Python/man/documentation.md).
+
+* For the R documentation as part of CRAN check [here](https://CRAN.R-project.org/package=popsom7).
