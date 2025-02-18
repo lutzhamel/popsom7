@@ -299,6 +299,7 @@ map.significance <- function(map,graphics=TRUE,feature.labels=TRUE)
   if (graphics)
   {
     par.v <- map.graphics.set()
+    on.exit(par(par.v))
 
     y <- max(prob.v)
     plot.new()
@@ -320,9 +321,10 @@ map.significance <- function(map,graphics=TRUE,feature.labels=TRUE)
     points(1:nfeatures,prob.v,type="h")
 
     map.graphics.reset(par.v)
-    }
-    else
-    {
+  }
+  else
+  {
+    names(prob.v) <- names(data.df)
     prob.v
   }
 }
@@ -924,8 +926,7 @@ accuracy <- function(map,sample,data.ix)
 
     if (coord.x != map.x || coord.y != map.y || best.ix != map.ix)
     {
-        cat("best.ix: ",best.ix," map.rix: ",map.ix,"\n")
-        stop("problems with coordinates")
+        stop(paste("problems with coordinates: ","best.ix: ",best.ix," map.ix: ",map.ix))
     }
 
     # determine if the best and second best are neighbors on the map
@@ -974,8 +975,7 @@ rowix <- function(map,cd)
 #                     the return value is the original graphics param vector
 map.graphics.set <- function()
 {
-  par.v <- par()
-  par(ps=6)
+  par.v <- par(ps=6)
   par.v
 }
 
@@ -983,7 +983,7 @@ map.graphics.set <- function()
 # parameter - a vector containing the settings for the original state
 map.graphics.reset <- function(par.vector)
 {
-  par(ps=par.vector$ps)
+  par(par.vector)
 }
 
 # plot.heat - plot a heat map based on a 'map', this plot also contains the
@@ -1009,6 +1009,7 @@ plot.heat <- function(map)
 
   ### set up the graphics window
   par.v <- map.graphics.set()
+  on.exit(par(par.v))
   plot.new()
   plot.window(xlim=c(0,x),ylim=c(0,y))
   box()

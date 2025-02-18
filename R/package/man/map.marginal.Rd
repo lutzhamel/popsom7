@@ -9,6 +9,7 @@ map.marginal(map,marginal)
   \item{map}{An object of type 'map'.}
   \item{marginal}{The name of a training data dimension or index.}
 }
+\value{No return value, called for side effects.}
 
 \author{Lutz Hamel, Robert Tatoian}
 \examples{

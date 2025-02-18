@@ -8,6 +8,7 @@ map.starburst(map)
 \arguments{
   \item{map}{An object of type 'map'}
 }
+\value{No return value, called for side effects.}
 
 \description{
 Generate a starburst representation of the clusters on the heat map for the
