@@ -324,7 +324,6 @@ map.significance <- function(map,graphics=TRUE,feature.labels=TRUE)
   }
   else
   {
-    names(prob.v) <- names(data.df)
     prob.v
   }
 }

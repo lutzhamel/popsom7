@@ -22,7 +22,7 @@ The main utilities available in this file are:
     map_marginal ----- displays a density plot of a training dataframe dimension
                          overlayed with the neuron density for that same dimension or index.
     
-License: MIT License
+License: GNU License
 """
 
 import numpy as np
@@ -87,7 +87,10 @@ def map_build(data, labels=None, xdim=10, ydim=5, alpha=0.3, train=1000, normali
         raise ValueError("train value has to be a positive integer value")
     
     # Train the neural network using vsom_r
-    neurons_array = vsom(data, xdim, ydim, alpha, train)
+    # from datetime import datetime
+    # now = datetime.now()
+    neurons_array = vsom_opt(data, xdim, ydim, alpha, train)
+    # print(datetime.now()-now)
     neurons = pd.DataFrame(neurons_array, columns=data.columns)
     
     # Construct the map object as a dictionary
@@ -908,6 +911,53 @@ def vsom(data, xdim, ydim, alpha, train):
         neurons = neurons - diff * gamma_m
     return neurons
 
+def vsom_opt(data, xdim, ydim, alpha, train):
+    # Preconvert data to NumPy array
+    data_arr = data.values.astype(float)
+    dr, dc = data_arr.shape
+    nr = xdim * ydim
+    nc = dc
+    neurons = np.random.uniform(-1, 1, (nr, nc))
+    
+    nsize = max(xdim, ydim) + 1
+    nsize_step = int(np.ceil(train / nsize))
+    step_counter = 0
+
+    # Build 2D coordinate lookup for neurons (1-indexed)
+    m2Ds = np.empty((nr, 2), dtype=float)
+    for i in range(1, nr + 1):
+        coord_obj = coordinate({'xdim': xdim}, i)
+        m2Ds[i - 1] = [coord_obj.x, coord_obj.y]
+    
+    # Precompute full distance matrix for m2Ds
+    from scipy.spatial.distance import pdist, squareform
+    m2D_distances = squareform(pdist(m2Ds))  # shape (nr, nr)
+    
+    def Gamma(c):
+        # c: 1-indexed winner index
+        # Retrieve precomputed distances
+        d = m2D_distances[c - 1]
+        threshold = nsize * 1.5
+        hood = np.where(d < threshold, alpha, 0.0)
+        return hood[:, np.newaxis]  # shape (nr, 1)
+
+    for epoch in range(train):
+        step_counter += 1
+        if step_counter == nsize_step:
+            step_counter = 0
+            nsize -= 1
+        
+        ix = np.random.randint(0, dr)
+        xk = data_arr[ix]  # using preconverted NumPy array
+        diff = neurons - xk  # broadcasting subtraction
+        s = np.sum(diff ** 2, axis=1)
+        c = np.argmin(s) + 1  # use argmin and 1-indexing
+        
+        gamma_m = Gamma(c)
+        neurons = neurons - diff * gamma_m  # update neurons vectorized
+
+    return neurons
+
 #---------------------------
 # Research functions
 #---------------------------
@@ -973,7 +1023,7 @@ if __name__ == "__main__":
    labels = iris[['Species']]
 
    # Build the map
-   som_map = map_build(df, labels=labels, xdim=15, ydim=10, alpha=0.3, train=1000, normalize=False, seed=42)
+   som_map = map_build(df, labels=labels, xdim=20, ydim=15, alpha=0.3, train=1000000, normalize=False, seed=42)
 
    # Print summary
    map_summary(som_map)
