@@ -626,8 +626,8 @@ def plot_heat(m):
     bins = np.linspace(heat_arr.min(), heat_arr.max(), 101)
     heat_v = np.digitize(heat_arr, bins)
     heat_matrix = heat_v.reshape(x, y)
-    #cmap = plt.cm.get_cmap("hot", 100)
-    cmap = plt.get_cmap("hot", 100)
+    #cmap = plt.get_cmap("hot", 100)
+    cmap = plt.get_cmap("plasma", 100)
 
     orig_params = map_graphics_set()
     plt.figure()
@@ -645,21 +645,26 @@ def plot_heat(m):
     for ix in range(1, x + 1):
         for iy in range(1, y + 1):
             color_index = 100 - heat_matrix[ix - 1, iy - 1]
-            rect = plt.Rectangle((ix - 1, iy - 1), 1, 1, color=cmap(color_index / 100), ec=None)
+            rect = plt.Rectangle((ix-1, iy-1), 1, 1, color=cmap(color_index / 100), ec=None)
             plt.gca().add_patch(rect)
     for ix in range(1, x + 1):
         for iy in range(1, y + 1):
             c = centroids[ix - 1][iy - 1]
             plt.plot([ix - 0.5, c.x - 0.5], 
                      [iy - 0.5, c.y - 0.5], 
-                     linewidth=1,
+                     linewidth=0.5,
                      color="grey")
     centroid_labels = majority_labels(m)
     for ix in range(1, x + 1):
         for iy in range(1, y + 1):
             lab = centroid_labels[ix - 1][iy - 1]
             if lab != "<None>":
-                plt.text(ix - 0.5, iy - 0.5, str(lab), ha="center", va="center")
+                plt.text(ix - 0.5, 
+                         iy - 0.5, 
+                         str(lab), 
+                         ha="center", 
+                         va="center",
+                         size="x-small")
     plt.show()
     map_graphics_reset(orig_params)
 
