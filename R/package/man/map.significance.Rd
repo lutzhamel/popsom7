@@ -3,7 +3,7 @@
 \title{Compute Significance of Features}
 \description{Computes the relative significance of each feature and plots it.}
 \usage{
-map.significance(map,graphics=TRUE,feature.labels=TRUE)
+map.significance(map,graphics=FALSE,feature.labels=TRUE)
 }
 \arguments{
   \item{map}{An object of type 'map'.}
@@ -28,11 +28,6 @@ labels <- subset(iris,select=Species)
 
 m <- map.build(df,labels,xdim=15,ydim=10,train=10000)
 
-## show the relative feature significance for each feature
-df <- data.frame(names(df),map.significance(m,graphics=FALSE))
-names(df) <- c("Features","Significance")
-df
-
-## display the relative feature significance graphically
+## show the relative feature significance
 map.significance(m)
 }

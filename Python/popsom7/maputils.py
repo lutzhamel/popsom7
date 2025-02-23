@@ -164,7 +164,8 @@ def map_summary(m, verb=True):
         print("\nQuality Assessments:")
         print(df2.round(2))
         print("\n")
-    return value
+    else:
+        return value
 
 #---------------------------
 # map_starburst -- display the starburst representation (i.e. heat map)
@@ -182,7 +183,7 @@ def map_starburst(m):
 #---------------------------
 # map_significance -- compute and (optionally) plot feature significance
 #---------------------------
-def map_significance(m, graphics=True, feature_labels=True):
+def map_significance(m, graphics=False, feature_labels=True):
     """
     compute the relative significance of each feature 
     based on variance and plot it.
@@ -227,7 +228,7 @@ def map_significance(m, graphics=True, feature_labels=True):
         plt.show()
         return None
     else:
-        return prob_v
+        return pd.Series(prob_v, index=data_df.columns)
 
 #---------------------------
 # map_marginal -- plot marginal density for a chosen dimension
@@ -534,9 +535,9 @@ def map_embed_ks(m, conf_int=0.95, verb=False):
     var_sum = 0
     for i in range(nfeatures):
         if ks_vector[i].pvalue > (1 - conf_int):
-            var_sum += prob_v[i]
+            var_sum += prob_v.iloc[i]
         else:
-            prob_v[i] = 0
+            prob_v.iloc[i] = 0
     if verb:
         return prob_v
     else:
@@ -964,22 +965,18 @@ def avg_homogeneity(m):
 
 # test code
 if __name__ == "__main__":
-   # Load the iris dataset
-   iris = pd.read_csv('iris.csv')
-   print(iris.head())
+    from sklearn import datasets
 
-   # Separate the features and the labels
-   df = iris.drop(columns=['id','Species'])
-   labels = iris[['Species']]
+    iris = datasets.load_iris()
+    X = pd.DataFrame(iris.data, columns=iris.feature_names)
+    y = pd.DataFrame(iris.target_names[iris.target],columns=['species'])
 
-   # Build the map
-   som_map = map_build(df, labels=labels, xdim=15, ydim=10, alpha=0.3, train=1000, normalize=False, seed=42)
+    # Build the map
+    som_map = map_build(X, labels=y, xdim=15, ydim=10, alpha=0.3, train=10000, normalize=False, seed=42)
 
-   # Print summary
-   map_summary(som_map)
-
-   # Display starburst (heat map)
-   map_starburst(som_map)
-
-   map_significance(som_map)
-   map_marginal(som_map,"Petal.Length")
+    map_summary(som_map)
+    map_starburst(som_map)
+    print(map_significance(som_map))
+    map_marginal(som_map,2)
+    v = map_summary(som_map, verb=False)
+    print(v['quality_assessments']['convergence'].iloc[0])

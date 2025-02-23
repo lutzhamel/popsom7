@@ -18,21 +18,20 @@ pip install popsom7
 ```
 
 ## Usage
-Below is a quick example:
+Below is a quick example using the popsom `maputils` interface.  Popsom also supports
+a sklearn compatible interface.  For more details please see the project [homepage](https://github.com/lutzhamel/popsom7) 
 
 ```python
 import pandas as pd
 from popsom7 import maputils
+from sklearn import datasets
 
-# Load your data (for example, a CSV file)
-data = pd.read_csv('iris.csv')
-
-# Optionally, separate out labels if available
-labels = data[['Species']]
-data = data.drop(columns=['id','Species'])
+iris = datasets.load_iris()
+X = pd.DataFrame(iris.data, columns=iris.feature_names)
+y = pd.DataFrame(iris.target_names[iris.target],columns=['species'])
 
 # Build the SOM
-som_map = maputils.map_build(data, labels=labels, xdim=15, ydim=10, alpha=0.3, train=10000, seed=42)
+som_map = maputils.map_build(X, labels=y, xdim=15, ydim=10, alpha=0.3, train=10000, seed=42)
 
 # Print a summary of the map
 maputils.map_summary(som_map)
@@ -41,6 +40,3 @@ maputils.map_summary(som_map)
 maputils.map_starburst(som_map)
 ```
 
-## Documentation
-
-Documentation of the API can be found [here](https://github.com/lutzhamel/popsom7/blob/master/Python/man/documentation.md)

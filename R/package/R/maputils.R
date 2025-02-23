@@ -103,7 +103,9 @@ map.build <- function(data,
   r <- sqrt(xdim^2 + ydim^2)
 
   # train the neural network
-  m <- som(data,
+  if (TRUE) {
+  #print(system.time(m <- som(data,
+  m <- som(as.data.frame(apply(data, 2, as.double)), # som needs reals
           xdim=xdim,
           ydim=ydim,
           init="random",
@@ -113,11 +115,21 @@ map.build <- function(data,
           topol="rect",
           radius=c(r,r),
           rlen=c(1,train))
+  #        ))
 
   # the 'som' package does something really annoying with attributes
   # for the neuron matrix, we get rid of that by casting the neurons
   # as a new matrix/dataframe
   neurons <- data.frame(matrix(m$code,xdim*ydim,ncol(data)))
+  }
+
+  if (FALSE) 
+  print(system.time(neurons <- vsom(data,
+                  xdim=xdim,
+                  ydim=ydim,
+                  alpha=alpha,
+                  train=train)))
+
   # inherit meta data from the input data
   names(neurons) <- names(data)
 
@@ -273,7 +285,7 @@ map.starburst <- function(map)
 #   feature indices
 # return value:
 # - a vector containing the significance for each feature
-map.significance <- function(map,graphics=TRUE,feature.labels=TRUE)
+map.significance <- function(map,graphics=FALSE,feature.labels=TRUE)
 {
   if (!inherits(map,"map"))
     stop("first argument is not a map object.")
@@ -294,6 +306,7 @@ map.significance <- function(map,graphics=TRUE,feature.labels=TRUE)
 
   var.sum <- sum(var.v)
   prob.v <- var.v/var.sum
+  names(prob.v) <- names(data.df)
 
   # plot the significance
   if (graphics)
@@ -324,7 +337,6 @@ map.significance <- function(map,graphics=TRUE,feature.labels=TRUE)
   }
   else
   {
-    names(prob.v) <- names(data.df)
     prob.v
   }
 }
@@ -1740,6 +1752,130 @@ numerical.labels <- function(map)
     centroid.labels[[ix,iy]] <- label
   }
   centroid.labels
+}
+
+### vsom.orig - vectorized, unoptimized version of the stochastic SOM training algorithm written entirely in R
+vsom.orig <- function(data,xdim,ydim,alpha,train)
+{
+    ### some constants
+    dr <- nrow(data)
+    dc <- ncol(data)
+    nr <- xdim*ydim
+    nc <- dc # dim of data and neurons is the same
+
+    ### build and initialize the matrix holding the neurons
+    cells <- nr * nc        # no. of neurons times number of data dimensions
+    v <- runif(cells,-1,1)  # vector with small init values for all neurons
+    # NOTE: each row represents a neuron, each column represents a dimension.
+    neurons <- matrix(v,nrow=nr,ncol=nc)  # rearrange the vector as matrix
+
+    ### compute the initial neighborhood size and step
+    #nsize <- ceiling(sqrt(xdim^2 + ydim^2))
+    nsize <- max(xdim,ydim) + 1
+    nsize.step <- ceiling(train/nsize)
+    step.counter <- 0 # counts the number of epochs per nsize.step
+
+    # convert a 1D rowindex into a 2D map coordinate
+    coord2D <- function(rowix)
+    {
+        x <- (rowix-1) %% xdim + 1
+        y <- (rowix-1) %/% xdim + 1
+
+        c(x,y)
+    }
+
+    # constants for the Gamma function
+    m <- c(1:nr)                     # a vector with all neuron 1D addresses
+    m2Ds <- matrix(coord2D(m),nr,2)  # x-y coordinate of ith neuron: m2Ds[i,] = c(xi,yi)
+
+    ### neighborhood function
+    Gamma <- function(c)
+    {
+        c2D <- m2Ds[c,]                          # lookup the 2D map coordinate for c
+        c2Ds <- rep(1,nr) %o% c2D                # a matrix with each row equal to c2D
+        d <- sqrt((c2Ds - m2Ds)^2 %*% c(1,1))    # distance vector of each neuron from c in terms of map coords!
+        hood <- ifelse(d < nsize*1.5,alpha,0.0)  # if m on the grid is in neigh then alpha else 0.0
+
+        as.vector(hood)
+    }
+
+    ### training ###
+    ### the epochs loop
+    for (epoch in 1:train)
+    {
+        # hood size decreases in disrete nsize.steps
+        step.counter <- step.counter + 1
+        if (step.counter == nsize.step)
+        {
+            step.counter <- 0
+            nsize <- nsize - 1
+        }
+
+        # create a sample training vector
+        ix <- sample(1:dr,1)
+        xk <- as.numeric(data[ix,])
+
+        ### competitive step
+        xk.m <- rep(1,nr) %o% xk
+        diff <- neurons - xk.m
+        squ <- diff * diff
+        s <- squ %*% rep(1,nc)
+        o <- order(s)
+        c <- o[1]
+
+        ### update step
+        gamma.m <- Gamma(c) %o% rep(1,nc)
+        neurons <- neurons - diff * gamma.m
+    }
+
+    neurons
+}
+
+### vsom - vectorized version of the stochastic SOM training algorithm written entirely in R
+vsom <- function(data, xdim, ydim, alpha, train) {
+  # dimensions
+  dr <- nrow(data)
+  nc <- ncol(data)
+  nr <- xdim * ydim
+  
+  # initialize neuron weight matrix
+  neurons <- matrix(runif(nr * nc, -1, 1), nrow = nr, ncol = nc)
+  
+  # precompute 2D grid coordinates for all neurons
+  m2Ds <- cbind(((1:nr - 1) %% xdim) + 1, ((1:nr - 1) %/% xdim) + 1)
+  
+  # initial neighborhood parameters
+  nsize <- max(xdim, ydim) + 1
+  nsize.step <- ceiling(train / nsize)
+  step.counter <- 0
+  
+  for (epoch in 1:train) {
+    # update neighborhood size every nsize.step iterations
+    step.counter <- step.counter + 1
+    if (step.counter == nsize.step) {
+      step.counter <- 0
+      nsize <- nsize - 1
+    }
+    
+    # randomly pick a training sample
+    ix <- sample.int(dr, 1)
+    xk <- as.numeric(data[ix,])
+    
+    # competitive step: compute squared Euclidean distances between xk and all neurons
+    diff <- neurons - matrix(xk, nrow = nr, ncol = nc, byrow = TRUE)
+    dists <- rowSums(diff^2)
+    bmu <- which.min(dists)  # best matching unit
+    
+    # neighborhood function: compute grid distances from BMU
+    d_grid <- sqrt(rowSums((m2Ds - matrix(m2Ds[bmu,], nrow = nr, ncol = 2, byrow = TRUE))^2))
+    gamma_vec <- ifelse(d_grid < (nsize * 1.5), alpha, 0)
+    
+    # update step: adjust all neurons toward xk using neighborhood weights
+    neurons <- neurons - (neurons - matrix(xk, nrow = nr, ncol = nc, byrow = TRUE)) *
+                           matrix(gamma_vec, nrow = nr, ncol = nc)
+  }
+  
+  neurons
 }
 
 ########################## research stuff ###########################
