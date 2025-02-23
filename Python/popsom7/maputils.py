@@ -633,13 +633,17 @@ def plot_heat(m):
     plt.figure()
     plt.xlim(0, x)
     plt.ylim(0, y)
-    plt.box(True)
+    plt.box(False)
     plt.xlabel("x")
     plt.ylabel("y")
-    xticks = np.arange(0.5, x, 1)
-    yticks = np.arange(0.5, y, 1)
-    xlabels = np.arange(1, x + 1)
-    ylabels = np.arange(1, y + 1)
+    xticks = [0.5, x-0.5] 
+    yticks = [0.5, y-0.5] 
+    xlabels = [1, x] 
+    ylabels = [1, y] 
+    #xticks = np.arange(0.5, x, 1)
+    #yticks = np.arange(0.5, y, 1)
+    #xlabels = np.arange(1, x + 1,1)
+    #ylabels = np.arange(1, y + 1,1)
     plt.xticks(xticks, xlabels)
     plt.yticks(yticks, ylabels)
     for ix in range(1, x + 1):
@@ -664,7 +668,8 @@ def plot_heat(m):
                          str(lab), 
                          ha="center", 
                          va="center",
-                         size="x-small")
+                         size="x-small",
+                         color="black")
     plt.show()
     map_graphics_reset(orig_params)
 
@@ -985,3 +990,4 @@ if __name__ == "__main__":
     map_marginal(som_map,2)
     v = map_summary(som_map, verb=False)
     print(v['quality_assessments']['convergence'].iloc[0])
+    print(som_map['unique_centroids'])
