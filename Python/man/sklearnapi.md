@@ -9,38 +9,35 @@ The `SOM` class is a scikit-learn compatible estimator that wraps the self-organ
 ```python
 from popsom7.sklearnapi import SOM
 import pandas as pd
+from sklearn import datasets
 
-# Load your dataset (e.g., the Iris dataset)
-iris = pd.read_csv('iris.csv')
-X = iris.drop(columns=['id', 'Species'])
-y = iris[['Species']]  # Optional: for reporting purposes
+iris = datasets.load_iris()
+X = pd.DataFrame(iris.data, columns=iris.feature_names)
+y = pd.DataFrame(iris.target_names[iris.target],columns=['species'])
 
 # Initialize the SOM model with desired parameters
-som = SOM(xdim=20, ydim=15, alpha=0.3, train=100000, seed=42)
+som = SOM(xdim=20, ydim=15, train=100000, seed=42)
 
 # Fit the SOM model
 som.fit(X, y)
 
-# Retrieve cluster assignments for the training data
-labels = som.fit_predict(X, y)
-
-# Predict cluster labels for new data
-predicted_labels = som.predict(X)
+# Predict cluster labels
+print(som.predict(X).head())
 
 # Map samples to their (x, y) coordinates on the SOM grid
-positions = som.transform(X)
+print(som.transform(X).head())
 
 # Display a summary of training parameters and quality assessments
-summary_info = som.summary()
+som.summary()
 
 # Visualize the SOM using a starburst (heat map) representation
 som.starburst()
 
-# Compute and optionally plot feature significance
-sig_values = som.significance(graphics=True, feature_labels=True)
+# Compute the feature significances
+print(som.significance())
 
 # Display a density (marginal) plot for a specific feature
-som.marginal("Petal.Length")
+som.marginal(2)
 ```
 
 ## Class Parameters

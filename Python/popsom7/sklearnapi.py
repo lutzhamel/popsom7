@@ -191,14 +191,13 @@ if __name__ == "__main__":
     y = pd.DataFrame(iris.target_names[iris.target],columns=['species'])
 
     # Create and fit the SOM model
-    som = SOM(xdim=20, ydim=15, alpha=0.3, train=10000, seed=42)
-    som.fit(X, y)
+    som = SOM(xdim=20, ydim=15, train=100000, seed=42).fit(X, y)
 
     # View a summary of the SOM
     som.summary()
 
     # Map new data to clusters
-    new_labels = som.predict(X)
+    print(som.predict(X).head())
 
     # Get the grid coordinates for each sample
     positions = som.transform(X)
@@ -207,6 +206,8 @@ if __name__ == "__main__":
     som.starburst()
 
     # Optionally, display feature significance or marginal plots
-    som.significance()
+    print(som.significance())
     som.marginal(2)
+
+
 

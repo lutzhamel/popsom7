@@ -99,36 +99,44 @@ map.build <- function(data,
   if (!test.integer(train))
     stop("train value has to be a positive integer value")
 
-  # compute the initial neighborhood radius
-  r <- sqrt(xdim^2 + ydim^2)
-
   # train the neural network
-  if (TRUE) {
-  #print(system.time(m <- som(data,
-  m <- som(as.data.frame(apply(data, 2, as.double)), # som needs reals
-          xdim=xdim,
-          ydim=ydim,
-          init="random",
-          alpha=c(alpha,alpha),
-          alphaType="linear",
-          neigh="bubble",
-          topol="rect",
-          radius=c(r,r),
-          rlen=c(1,train))
-  #        ))
+  if (TRUE) 
+  {
+    #print(system.time(
 
-  # the 'som' package does something really annoying with attributes
-  # for the neuron matrix, we get rid of that by casting the neurons
-  # as a new matrix/dataframe
-  neurons <- data.frame(matrix(m$code,xdim*ydim,ncol(data)))
+    neurons <- vsom.f(data,
+                      xdim=xdim,
+                      ydim=ydim,
+                      alpha=alpha,
+                      train=train
+                      )
+     #       ))
+
   }
 
-  if (FALSE) 
-  print(system.time(neurons <- vsom(data,
-                  xdim=xdim,
-                  ydim=ydim,
-                  alpha=alpha,
-                  train=train)))
+  else 
+  {
+    # compute the initial neighborhood radius
+    r <- sqrt(xdim^2 + ydim^2)
+
+    print(system.time(
+    m <- som(as.data.frame(apply(data, 2, as.double)), # som needs reals
+            xdim=xdim,
+            ydim=ydim,
+            init="random",
+            alpha=c(alpha,alpha),
+            alphaType="linear",
+            neigh="bubble",
+            topol="rect",
+            radius=c(r,r),
+            rlen=c(1,train))
+           ))
+
+    # the 'som' package does something really annoying with attributes
+    # for the neuron matrix, we get rid of that by casting the neurons
+    # as a new matrix/dataframe
+    neurons <- data.frame(matrix(m$code,xdim*ydim,ncol(data)))
+  }
 
   # inherit meta data from the input data
   names(neurons) <- names(data)
@@ -847,7 +855,7 @@ map.embed.ks <- function(map,conf.int=.95,verb=FALSE)
   if (verb)
     prob.v
   else
-    var.sum
+    as.numeric(var.sum)
 }
 
 # map.normalize -- based on the som:normalize function but preserved names
@@ -1754,8 +1762,9 @@ numerical.labels <- function(map)
   centroid.labels
 }
 
-### vsom.orig - vectorized, unoptimized version of the stochastic SOM training algorithm written entirely in R
-vsom.orig <- function(data,xdim,ydim,alpha,train)
+# vsom.f - vectorized and optimized version of the stochastic
+# SOM training algorithm written in Fortran90
+vsom.f <- function(data,xdim,ydim,alpha,train)
 {
     ### some constants
     dr <- nrow(data)
@@ -1769,113 +1778,27 @@ vsom.orig <- function(data,xdim,ydim,alpha,train)
     # NOTE: each row represents a neuron, each column represents a dimension.
     neurons <- matrix(v,nrow=nr,ncol=nc)  # rearrange the vector as matrix
 
-    ### compute the initial neighborhood size and step
-    #nsize <- ceiling(sqrt(xdim^2 + ydim^2))
-    nsize <- max(xdim,ydim) + 1
-    nsize.step <- ceiling(train/nsize)
-    step.counter <- 0 # counts the number of epochs per nsize.step
+    ### compute the data ix vector
+    dataix <- sample(1:dr,size=train,replace=TRUE)
 
-    # convert a 1D rowindex into a 2D map coordinate
-    coord2D <- function(rowix)
-    {
-        x <- (rowix-1) %% xdim + 1
-        y <- (rowix-1) %/% xdim + 1
+    result <- .Fortran("vsom",
+                       as.single(neurons),
+                       as.single(data.matrix(data)),
+                       as.integer(dr),
+                       as.integer(dc),
+                       as.integer(xdim),
+                       as.integer(ydim),
+                       as.single(alpha),
+                       as.integer(train),
+                       as.integer(dataix),
+                       PACKAGE="popsom7")
 
-        c(x,y)
-    }
-
-    # constants for the Gamma function
-    m <- c(1:nr)                     # a vector with all neuron 1D addresses
-    m2Ds <- matrix(coord2D(m),nr,2)  # x-y coordinate of ith neuron: m2Ds[i,] = c(xi,yi)
-
-    ### neighborhood function
-    Gamma <- function(c)
-    {
-        c2D <- m2Ds[c,]                          # lookup the 2D map coordinate for c
-        c2Ds <- rep(1,nr) %o% c2D                # a matrix with each row equal to c2D
-        d <- sqrt((c2Ds - m2Ds)^2 %*% c(1,1))    # distance vector of each neuron from c in terms of map coords!
-        hood <- ifelse(d < nsize*1.5,alpha,0.0)  # if m on the grid is in neigh then alpha else 0.0
-
-        as.vector(hood)
-    }
-
-    ### training ###
-    ### the epochs loop
-    for (epoch in 1:train)
-    {
-        # hood size decreases in disrete nsize.steps
-        step.counter <- step.counter + 1
-        if (step.counter == nsize.step)
-        {
-            step.counter <- 0
-            nsize <- nsize - 1
-        }
-
-        # create a sample training vector
-        ix <- sample(1:dr,1)
-        xk <- as.numeric(data[ix,])
-
-        ### competitive step
-        xk.m <- rep(1,nr) %o% xk
-        diff <- neurons - xk.m
-        squ <- diff * diff
-        s <- squ %*% rep(1,nc)
-        o <- order(s)
-        c <- o[1]
-
-        ### update step
-        gamma.m <- Gamma(c) %o% rep(1,nc)
-        neurons <- neurons - diff * gamma.m
-    }
+    # unpack the structure and list in result[1]
+    v <- result[1]
+    # rearrange the result vector as matrix
+    neurons <- matrix(v[[1]],nrow=nr,ncol=nc,byrow=FALSE)
 
     neurons
-}
-
-### vsom - vectorized version of the stochastic SOM training algorithm written entirely in R
-vsom <- function(data, xdim, ydim, alpha, train) {
-  # dimensions
-  dr <- nrow(data)
-  nc <- ncol(data)
-  nr <- xdim * ydim
-  
-  # initialize neuron weight matrix
-  neurons <- matrix(runif(nr * nc, -1, 1), nrow = nr, ncol = nc)
-  
-  # precompute 2D grid coordinates for all neurons
-  m2Ds <- cbind(((1:nr - 1) %% xdim) + 1, ((1:nr - 1) %/% xdim) + 1)
-  
-  # initial neighborhood parameters
-  nsize <- max(xdim, ydim) + 1
-  nsize.step <- ceiling(train / nsize)
-  step.counter <- 0
-  
-  for (epoch in 1:train) {
-    # update neighborhood size every nsize.step iterations
-    step.counter <- step.counter + 1
-    if (step.counter == nsize.step) {
-      step.counter <- 0
-      nsize <- nsize - 1
-    }
-    
-    # randomly pick a training sample
-    ix <- sample.int(dr, 1)
-    xk <- as.numeric(data[ix,])
-    
-    # competitive step: compute squared Euclidean distances between xk and all neurons
-    diff <- neurons - matrix(xk, nrow = nr, ncol = nc, byrow = TRUE)
-    dists <- rowSums(diff^2)
-    bmu <- which.min(dists)  # best matching unit
-    
-    # neighborhood function: compute grid distances from BMU
-    d_grid <- sqrt(rowSums((m2Ds - matrix(m2Ds[bmu,], nrow = nr, ncol = 2, byrow = TRUE))^2))
-    gamma_vec <- ifelse(d_grid < (nsize * 1.5), alpha, 0)
-    
-    # update step: adjust all neurons toward xk using neighborhood weights
-    neurons <- neurons - (neurons - matrix(xk, nrow = nr, ncol = nc, byrow = TRUE)) *
-                           matrix(gamma_vec, nrow = nr, ncol = nc)
-  }
-  
-  neurons
 }
 
 ########################## research stuff ###########################

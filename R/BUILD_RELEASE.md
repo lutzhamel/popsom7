@@ -41,3 +41,24 @@ in your local Git repository.
 2. Make sure you have the R `devtools` package installed.
 2. Execute the function `devtools::test()`.
 
+## Building/Loading the Shareable Fortran Library
+
+1. Go to the  `src` folder of the cloned git popsom repo and type the following command
+```
+$ R CMD SHLIB vsom.f90
+```
+This generates a .so and .o file.
+1. Set the working directory of the R terminal to the location of vsom.so
+1. Load `vsom.so` as a dynamic object using `dyn.load()`
+1.  Verify that the dynamic loadable object is loaded using `is.loaded()`
+1.  Load `maputils.R` using `source()`. You will probably have to do
+    some **manual adjustments** to the R code to load it outside of a package
+    context.
+
+Briefly:
+```
+R CMD SHLIB vsom.f90
+dyn.unload("vsom.so")
+dyn.load("vsom.so")
+is.loaded("vsom.so")
+```
