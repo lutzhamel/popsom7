@@ -897,11 +897,13 @@ def vsom(data, xdim, ydim, alpha, train):
         coord_obj = coordinate({'xdim': xdim}, i)
         m2Ds.append([coord_obj.x, coord_obj.y])
     m2Ds = np.array(m2Ds)
+    
     def Gamma(c):
         c2D = m2Ds[c - 1]
         d = np.sqrt(np.sum((m2Ds - c2D) ** 2, axis=1))
         hood = np.where(d < nsize * 1.5, alpha, 0.0)
         return hood.reshape(-1, 1)
+
     for epoch in range(train):
         step_counter += 1
         if step_counter == nsize_step:
