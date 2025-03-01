@@ -102,12 +102,15 @@ map.build <- function(data,
   # train the neural network
   if (TRUE) 
   {
+    #print(system.time(
+
     neurons <- vsom.f(data,
                       xdim=xdim,
                       ydim=ydim,
                       alpha=alpha,
                       train=train
                       )
+     #       ))
 
   }
 
@@ -116,7 +119,7 @@ map.build <- function(data,
     # compute the initial neighborhood radius
     r <- sqrt(xdim^2 + ydim^2)
 
-    #print(system.time(m <- som(data,
+    print(system.time(
     m <- som(as.data.frame(apply(data, 2, as.double)), # som needs reals
             xdim=xdim,
             ydim=ydim,
@@ -127,7 +130,7 @@ map.build <- function(data,
             topol="rect",
             radius=c(r,r),
             rlen=c(1,train))
-    #        ))
+           ))
 
     # the 'som' package does something really annoying with attributes
     # for the neuron matrix, we get rid of that by casting the neurons
