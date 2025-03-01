@@ -10,12 +10,12 @@ y = pd.DataFrame(iris.target_names[iris.target],columns=['species'])
 
 m = maputils.map_build(X, 
                        labels=y, 
-                       xdim=15, 
-                       ydim=10, 
-                       alpha=0.3, 
-                       train=10000, 
-                       normalize=False, 
+                       xdim=20, 
+                       ydim=15, 
+                       train=100000, 
                        seed=42)
+
+maputils.map_summary(m)
 
 class TestMaputils(unittest.TestCase):
     def test_build(self):
