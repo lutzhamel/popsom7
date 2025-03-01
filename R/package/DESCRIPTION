@@ -1,5 +1,5 @@
 Package: popsom7
-Version: 7.0.0
+Version: 7.1.0
 Title: A User-Friendly Implementation of Self-Organizing Maps
 Authors@R: c(person(given = "Lutz",
                       family = "Hamel",
