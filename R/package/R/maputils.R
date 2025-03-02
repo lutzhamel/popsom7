@@ -99,25 +99,45 @@ map.build <- function(data,
   if (!test.integer(train))
     stop("train value has to be a positive integer value")
 
-  # compute the initial neighborhood radius
-  r <- sqrt(xdim^2 + ydim^2)
-
   # train the neural network
-  m <- som(data,
-          xdim=xdim,
-          ydim=ydim,
-          init="random",
-          alpha=c(alpha,alpha),
-          alphaType="linear",
-          neigh="bubble",
-          topol="rect",
-          radius=c(r,r),
-          rlen=c(1,train))
+  if (TRUE) 
+  {
+    #print(system.time(
 
-  # the 'som' package does something really annoying with attributes
-  # for the neuron matrix, we get rid of that by casting the neurons
-  # as a new matrix/dataframe
-  neurons <- data.frame(matrix(m$code,xdim*ydim,ncol(data)))
+    neurons <- vsom.f(data,
+                      xdim=xdim,
+                      ydim=ydim,
+                      alpha=alpha,
+                      train=train
+                      )
+     #       ))
+
+  }
+
+  else 
+  {
+    # compute the initial neighborhood radius
+    r <- sqrt(xdim^2 + ydim^2)
+
+    print(system.time(
+    m <- som(as.data.frame(apply(data, 2, as.double)), # som needs reals
+            xdim=xdim,
+            ydim=ydim,
+            init="random",
+            alpha=c(alpha,alpha),
+            alphaType="linear",
+            neigh="bubble",
+            topol="rect",
+            radius=c(r,r),
+            rlen=c(1,train))
+           ))
+
+    # the 'som' package does something really annoying with attributes
+    # for the neuron matrix, we get rid of that by casting the neurons
+    # as a new matrix/dataframe
+    neurons <- data.frame(matrix(m$code,xdim*ydim,ncol(data)))
+  }
+
   # inherit meta data from the input data
   names(neurons) <- names(data)
 
@@ -273,7 +293,7 @@ map.starburst <- function(map)
 #   feature indices
 # return value:
 # - a vector containing the significance for each feature
-map.significance <- function(map,graphics=TRUE,feature.labels=TRUE)
+map.significance <- function(map,graphics=FALSE,feature.labels=TRUE)
 {
   if (!inherits(map,"map"))
     stop("first argument is not a map object.")
@@ -294,6 +314,7 @@ map.significance <- function(map,graphics=TRUE,feature.labels=TRUE)
 
   var.sum <- sum(var.v)
   prob.v <- var.v/var.sum
+  names(prob.v) <- names(data.df)
 
   # plot the significance
   if (graphics)
@@ -834,7 +855,7 @@ map.embed.ks <- function(map,conf.int=.95,verb=FALSE)
   if (verb)
     prob.v
   else
-    var.sum
+    as.numeric(var.sum)
 }
 
 # map.normalize -- based on the som:normalize function but preserved names
@@ -1739,6 +1760,45 @@ numerical.labels <- function(map)
     centroid.labels[[ix,iy]] <- label
   }
   centroid.labels
+}
+
+# vsom.f - vectorized and optimized version of the stochastic
+# SOM training algorithm written in Fortran90
+vsom.f <- function(data,xdim,ydim,alpha,train)
+{
+    ### some constants
+    dr <- nrow(data)
+    dc <- ncol(data)
+    nr <- xdim*ydim
+    nc <- dc # dim of data and neurons is the same
+
+    ### build and initialize the matrix holding the neurons
+    cells <- nr * nc        # no. of neurons times number of data dimensions
+    v <- runif(cells,-1,1)  # vector with small init values for all neurons
+    # NOTE: each row represents a neuron, each column represents a dimension.
+    neurons <- matrix(v,nrow=nr,ncol=nc)  # rearrange the vector as matrix
+
+    ### compute the data ix vector
+    dataix <- sample(1:dr,size=train,replace=TRUE)
+
+    result <- .Fortran("vsom",
+                       as.single(neurons),
+                       as.single(data.matrix(data)),
+                       as.integer(dr),
+                       as.integer(dc),
+                       as.integer(xdim),
+                       as.integer(ydim),
+                       as.single(alpha),
+                       as.integer(train),
+                       as.integer(dataix),
+                       PACKAGE="popsom7")
+
+    # unpack the structure and list in result[1]
+    v <- result[1]
+    # rearrange the result vector as matrix
+    neurons <- matrix(v[[1]],nrow=nr,ncol=nc,byrow=FALSE)
+
+    neurons
 }
 
 ########################## research stuff ###########################

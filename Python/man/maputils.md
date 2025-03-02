@@ -1,5 +1,8 @@
 # Popsom Python Interface Functions
 
+This interface is modeled after the R interface to popsom.  For a more object-oriented
+approach see the documentation on the sklearn API.
+
 ## map_build
 
 ### Description
@@ -84,14 +87,11 @@ An object of type `map` with the following member fields:
 ```python
 import pandas as pd
 from popsom7 import maputils
+from sklearn import datasets
 
-## training data
-iris = pd.read_csv('iris.csv')
-print(iris.head())
-
-## Separate the features and the labels
-X = iris.drop(columns=['id','Species'])
-y = iris[['Species']]
+iris = datasets.load_iris()
+X = pd.DataFrame(iris.data, columns=iris.feature_names)
+y = pd.DataFrame(iris.target_names[iris.target],columns=['species'])
 
 ## build a map
 m = maputils.map_build(X, y, xdim = 15, ydim = 10, train = 10000, seed = 42)
@@ -143,14 +143,11 @@ The structure of the return value depends on the `verb` switch.
 ```python
 import pandas as pd
 from popsom7 import maputils
+from sklearn import datasets
 
-## training data
-iris = pd.read_csv('iris.csv')
-print(iris.head())
-
-## Separate the features and the labels
-X = iris.drop(columns=['id','Species'])
-y = iris[['Species']]
+iris = datasets.load_iris()
+X = pd.DataFrame(iris.data, columns=iris.feature_names)
+y = pd.DataFrame(iris.target_names[iris.target],columns=['species'])
 
 ## build a map
 m = maputils.map_build(X, y, xdim = 15, ydim = 10, train = 1000)
@@ -186,14 +183,11 @@ A vector of predicted labels, one for each observation in the training data.
 ```python
 import pandas as pd
 from popsom7 import maputils
+from sklearn import datasets
 
-## training data
-iris = pd.read_csv('iris.csv')
-print(iris.head())
-
-## Separate the features and the labels
-X = iris.drop(columns=['id','Species'])
-y = iris[['Species']]
+iris = datasets.load_iris()
+X = pd.DataFrame(iris.data, columns=iris.feature_names)
+y = pd.DataFrame(iris.target_names[iris.target],columns=['species'])
 
 m = maputils.map_build(X, y, xdim = 15, ydim = 10, train = 10000)
 
@@ -224,14 +218,11 @@ map_marginal(map, marginal)
 ```python
 import pandas as pd
 from popsom7 import maputils
+from sklearn import datasets
 
-## training data
-iris = pd.read_csv('iris.csv')
-print(iris.head())
-
-## Separate the features and the labels
-X = iris.drop(columns=['id','Species'])
-y = iris[['Species']]
+iris = datasets.load_iris()
+X = pd.DataFrame(iris.data, columns=iris.feature_names)
+y = pd.DataFrame(iris.target_names[iris.target],columns=['species'])
 
 ## build a map
 m = maputils.map_build(X, y, xdim = 15, ydim = 10, train = 10000)
@@ -270,14 +261,11 @@ A data frame with (x,y)-positions. The data frame has two columns:
 ```python
 import pandas as pd
 from popsom7 import maputils
+from sklearn import datasets
 
-## training data
-iris = pd.read_csv('iris.csv')
-print(iris.head())
-
-## Separate the features and the labels
-X = iris.drop(columns=['id','Species'])
-y = iris[['Species']]
+iris = datasets.load_iris()
+X = pd.DataFrame(iris.data, columns=iris.feature_names)
+y = pd.DataFrame(iris.target_names[iris.target],columns=['species'])
 
 m = maputils.map_build(X, y, xdim = 15, ydim = 10, train = 10000)
 
@@ -314,14 +302,11 @@ A data frame with classification results. The data frame has two columns:
 ```python
 import pandas as pd
 from popsom7 import maputils
+from sklearn import datasets
 
-## training data
-iris = pd.read_csv('iris.csv')
-print(iris.head())
-
-## Separate the features and the labels
-X = iris.drop(columns=['id','Species'])
-y = iris[['Species']]
+iris = datasets.load_iris()
+X = pd.DataFrame(iris.data, columns=iris.feature_names)
+y = pd.DataFrame(iris.target_names[iris.target],columns=['species'])
 
 m = maputils.map_build(X, y, xdim = 15, ydim = 10, train = 10000)
 
@@ -339,7 +324,7 @@ Computes the relative significance of each feature and plots it.
 ### Usage
 
 ```python
-map_significance(map, graphics = True, feature_labels = True)
+map_significance(map, graphics = False, feature_labels = True)
 ```
 
 ### Arguments
@@ -364,14 +349,11 @@ If `graphics = False`, a vector containing the significance for each feature is 
 ```python
 import pandas as pd
 from popsom7 import maputils
+from sklearn import datasets
 
-## training data
-iris = pd.read_csv('iris.csv')
-print(iris.head())
-
-## Separate the features and the labels
-X = iris.drop(columns=['id','Species'])
-y = iris[['Species']]
+iris = datasets.load_iris()
+X = pd.DataFrame(iris.data, columns=iris.feature_names)
+y = pd.DataFrame(iris.target_names[iris.target],columns=['species'])
 
 m = maputils.map_build(X, y, xdim = 15, ydim = 10, train = 10000)
 
@@ -407,14 +389,11 @@ Generate a starburst representation of the clusters on the heat map for the self
 ```python
 import pandas as pd
 from popsom7 import maputils
+from sklearn import datasets
 
-## training data
-iris = pd.read_csv('iris.csv')
-print(iris.head())
-
-## Separate the features and the labels
-X = iris.drop(columns=['id','Species'])
-y = iris[['Species']]
+iris = datasets.load_iris()
+X = pd.DataFrame(iris.data, columns=iris.feature_names)
+y = pd.DataFrame(iris.target_names[iris.target],columns=['species'])
 
 m = maputils.map_build(X, y, xdim = 15, ydim = 10, train = 10000)
 
@@ -460,14 +439,11 @@ If `verb` is `True`, the `summary_map` object is formatted and printed to the sc
 ```python
 import pandas as pd
 from popsom7 import maputils
+from sklearn import datasets
 
-## training data
-iris = pd.read_csv('iris.csv')
-print(iris.head())
-
-## Separate the features and the labels
-X = iris.drop(columns=['id','Species'])
-y = iris[['Species']]
+iris = datasets.load_iris()
+X = pd.DataFrame(iris.data, columns=iris.feature_names)
+y = pd.DataFrame(iris.target_names[iris.target],columns=['species'])
 
 ## build a map
 m = maputils.map_build(X, y, xdim = 15, ydim = 10, train = 10000)

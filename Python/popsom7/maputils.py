@@ -167,7 +167,8 @@ def map_summary(m, verb=True):
         print("\nQuality Assessments:")
         print(df2.round(2))
         print("\n")
-    return value
+    else:
+        return value
 
 #---------------------------
 # map_starburst -- display the starburst representation (i.e. heat map)
@@ -185,7 +186,7 @@ def map_starburst(m):
 #---------------------------
 # map_significance -- compute and (optionally) plot feature significance
 #---------------------------
-def map_significance(m, graphics=True, feature_labels=True):
+def map_significance(m, graphics=False, feature_labels=True):
     """
     compute the relative significance of each feature 
     based on variance and plot it.
@@ -230,7 +231,7 @@ def map_significance(m, graphics=True, feature_labels=True):
         plt.show()
         return None
     else:
-        return prob_v
+        return pd.Series(prob_v, index=data_df.columns)
 
 #---------------------------
 # map_marginal -- plot marginal density for a chosen dimension
@@ -537,9 +538,9 @@ def map_embed_ks(m, conf_int=0.95, verb=False):
     var_sum = 0
     for i in range(nfeatures):
         if ks_vector[i].pvalue > (1 - conf_int):
-            var_sum += prob_v[i]
+            var_sum += prob_v.iloc[i]
         else:
-            prob_v[i] = 0
+            prob_v.iloc[i] = 0
     if verb:
         return prob_v
     else:
@@ -628,40 +629,50 @@ def plot_heat(m):
     bins = np.linspace(heat_arr.min(), heat_arr.max(), 101)
     heat_v = np.digitize(heat_arr, bins)
     heat_matrix = heat_v.reshape(x, y)
-    #cmap = plt.cm.get_cmap("hot", 100)
-    cmap = plt.get_cmap("hot", 100)
+    #cmap = plt.get_cmap("hot", 100)
+    cmap = plt.get_cmap("plasma", 100)
 
     orig_params = map_graphics_set()
     plt.figure()
     plt.xlim(0, x)
     plt.ylim(0, y)
-    plt.box(True)
+    plt.box(False)
     plt.xlabel("x")
     plt.ylabel("y")
-    xticks = np.arange(0.5, x, 1)
-    yticks = np.arange(0.5, y, 1)
-    xlabels = np.arange(1, x + 1)
-    ylabels = np.arange(1, y + 1)
+    xticks = [0.5, x-0.5] 
+    yticks = [0.5, y-0.5] 
+    xlabels = [1, x] 
+    ylabels = [1, y] 
+    #xticks = np.arange(0.5, x, 1)
+    #yticks = np.arange(0.5, y, 1)
+    #xlabels = np.arange(1, x + 1,1)
+    #ylabels = np.arange(1, y + 1,1)
     plt.xticks(xticks, xlabels)
     plt.yticks(yticks, ylabels)
     for ix in range(1, x + 1):
         for iy in range(1, y + 1):
             color_index = 100 - heat_matrix[ix - 1, iy - 1]
-            rect = plt.Rectangle((ix - 1, iy - 1), 1, 1, color=cmap(color_index / 100), ec=None)
+            rect = plt.Rectangle((ix-1, iy-1), 1, 1, color=cmap(color_index / 100), ec=None)
             plt.gca().add_patch(rect)
     for ix in range(1, x + 1):
         for iy in range(1, y + 1):
             c = centroids[ix - 1][iy - 1]
             plt.plot([ix - 0.5, c.x - 0.5], 
                      [iy - 0.5, c.y - 0.5], 
-                     linewidth=1,
+                     linewidth=0.5,
                      color="grey")
     centroid_labels = majority_labels(m)
     for ix in range(1, x + 1):
         for iy in range(1, y + 1):
             lab = centroid_labels[ix - 1][iy - 1]
             if lab != "<None>":
-                plt.text(ix - 0.5, iy - 0.5, str(lab), ha="center", va="center")
+                plt.text(ix - 0.5, 
+                         iy - 0.5, 
+                         str(lab), 
+                         ha="center", 
+                         va="center",
+                         size="x-small",
+                         color="black")
     plt.show()
     map_graphics_reset(orig_params)
 
@@ -872,92 +883,6 @@ def numerical_labels(m):
         centroid_labels_array[ix - 1][iy - 1] = label
     return centroid_labels_array
 
-def vsom(data, xdim, ydim, alpha, train):
-    dr = data.shape[0]
-    dc = data.shape[1]
-    nr = xdim * ydim
-    nc = dc
-    cells = nr * nc
-    v = np.random.uniform(-1, 1, cells)
-    neurons = v.reshape(nr, nc)
-    nsize = max(xdim, ydim) + 1
-    nsize_step = int(np.ceil(train / nsize))
-    step_counter = 0
-    # Build 2D coordinate lookup for neurons (1-indexed)
-    m2Ds = []
-    for i in range(1, nr + 1):
-        coord_obj = coordinate({'xdim': xdim}, i)
-        m2Ds.append([coord_obj.x, coord_obj.y])
-    m2Ds = np.array(m2Ds)
-    def Gamma(c):
-        c2D = m2Ds[c - 1]
-        d = np.sqrt(np.sum((m2Ds - c2D) ** 2, axis=1))
-        hood = np.where(d < nsize * 1.5, alpha, 0.0)
-        return hood.reshape(-1, 1)
-    for epoch in range(train):
-        step_counter += 1
-        if step_counter == nsize_step:
-            step_counter = 0
-            nsize = nsize - 1
-        ix = np.random.randint(0, dr)
-        xk = data.iloc[ix].values.astype(float)
-        xk_m = np.tile(xk, (nr, 1))
-        diff = neurons - xk_m
-        squ = diff ** 2
-        s = np.sum(squ, axis=1)
-        order = np.argsort(s) + 1  # 1-indexing
-        c = int(order[0])
-        gamma_m = Gamma(c)
-        neurons = neurons - diff * gamma_m
-    return neurons
-
-def vsom_opt(data, xdim, ydim, alpha, train):
-    # Preconvert data to NumPy array
-    data_arr = data.values.astype(float)
-    dr, dc = data_arr.shape
-    nr = xdim * ydim
-    nc = dc
-    neurons = np.random.uniform(-1, 1, (nr, nc))
-    
-    nsize = max(xdim, ydim) + 1
-    nsize_step = int(np.ceil(train / nsize))
-    step_counter = 0
-
-    # Build 2D coordinate lookup for neurons (1-indexed)
-    m2Ds = np.empty((nr, 2), dtype=float)
-    for i in range(1, nr + 1):
-        coord_obj = coordinate({'xdim': xdim}, i)
-        m2Ds[i - 1] = [coord_obj.x, coord_obj.y]
-    
-    # Precompute full distance matrix for m2Ds
-    from scipy.spatial.distance import pdist, squareform
-    m2D_distances = squareform(pdist(m2Ds))  # shape (nr, nr)
-    
-    def Gamma(c):
-        # c: 1-indexed winner index
-        # Retrieve precomputed distances
-        d = m2D_distances[c - 1]
-        threshold = nsize * 1.5
-        hood = np.where(d < threshold, alpha, 0.0)
-        return hood[:, np.newaxis]  # shape (nr, 1)
-
-    for epoch in range(train):
-        step_counter += 1
-        if step_counter == nsize_step:
-            step_counter = 0
-            nsize -= 1
-        
-        ix = np.random.randint(0, dr)
-        xk = data_arr[ix]  # using preconverted NumPy array
-        diff = neurons - xk  # broadcasting subtraction
-        s = np.sum(diff ** 2, axis=1)
-        c = np.argmin(s) + 1  # use argmin and 1-indexing
-        
-        gamma_m = Gamma(c)
-        neurons = neurons - diff * gamma_m  # update neurons vectorized
-
-    return neurons
-
 #---------------------------
 # Research functions
 #---------------------------
@@ -1011,25 +936,160 @@ def avg_homogeneity(m):
                 sum_majority += m_val
     return {'homog': sum_majority / nobs, 'nclust': n_centroids}
 
+#---------------------------
+# Vsom implementation
+#---------------------------
+
+def coord2D(ix, xdim):
+    """
+    Convert a 1D neuron index (0-indexed) into a 2D map coordinate.
+    
+    Parameters:
+        ix (int): The 0-indexed neuron index.
+        xdim (int): The width of the grid.
+        
+    Returns:
+        tuple: (x, y) coordinate on the grid.
+    """
+    # For Fortran, the conversion was:
+    #   coord(1) = modulo(ix-1, xdim) + 1
+    #   coord(2) = (ix-1)//xdim + 1
+    # In Python we use 0-indexing:
+    return (ix % xdim, ix // xdim)
+
+def Gamma(cache, cache_valid, coord_lookup, nsize, xdim, ydim, c):
+    """
+    Compute (and cache) the neighborhood vector for neuron 'c'.
+    
+    The neighborhood vector is 1.0 for neurons whose squared Euclidean distance 
+    (on the grid) from neuron 'c' is below a threshold ((nsize * 1.5)**2),
+    and 0.0 otherwise.
+    
+    Parameters:
+        cache (ndarray): A 2D array of shape (num_neurons, num_neurons) that holds 
+                         neighborhood vectors in its columns.
+        cache_valid (ndarray): A boolean array of length num_neurons that tracks 
+                               whether the neighborhood for a given neuron is up-to-date.
+        coord_lookup (ndarray): An array of shape (num_neurons, 2) with each neuron’s grid coordinates.
+        nsize (int): The current neighborhood size (affecting the threshold).
+        xdim (int): The width of the grid.
+        ydim (int): The height of the grid.
+        c (int): The index of the winning neuron.
+    """
+    # If the neighborhood vector for neuron c has been computed already, do nothing.
+    if cache_valid[c]:
+        return
+
+    # Get the (x,y) coordinate for neuron c.
+    c2D = coord_lookup[c]  # this is a 1D array: [x, y]
+
+    # Compute the squared Euclidean distances from c2D to every neuron’s coordinate.
+    d = np.sum((coord_lookup - c2D)**2, axis=1)
+    
+    # Determine the threshold. (nsize*1.5)**2 in Fortran.
+    threshold = (nsize * 1.5) ** 2
+    
+    # Set the neighborhood vector: 1.0 where distance is below threshold, else 0.0.
+    cache[:, c] = np.where(d < threshold, 1.0, 0.0)
+    
+    # Mark this column as valid.
+    cache_valid[c] = True
+
+def vsom(dt, xdim, ydim, alpha, train):
+    """
+    Implements a stochastic Self-Organizing Map (SOM) training algorithm.
+    
+    Parameters:
+        dt (ndarray or DataFrame): The training data as an array of shape (dtrows, dtcols) or as a pandas DataFrame.
+        dtix (array-like): A sequence (length 'train') of indices into dt representing the order 
+                           in which training observations are selected.
+                           (Indices are assumed to be 0-indexed.)
+        xdim (int): The width (number of columns) of the neuron grid.
+        ydim (int): The height (number of rows) of the neuron grid.
+        alpha (float): The learning rate.
+        train (int): The number of training iterations (epochs).
+    
+    Returns:
+        ndarray: The neuron weights after training.
+    """
+    # Initialize neurons with small random values.
+    neurons = np.random.rand(xdim*ydim, dt.shape[1]).astype(np.float32) * 0.1
+    num_neurons = neurons.shape[0]
+
+    # Initialize data selector
+    dtix = np.random.choice(dt.shape[0], train, replace=True)
+
+    # If dt is a DataFrame, convert it to a NumPy array.
+    if isinstance(dt, pd.DataFrame):
+        dt = dt.values
+    
+    # setup: determine initial neighborhood size and steps.
+    nsize = max(xdim, ydim) + 1
+    nsize_step = int(np.ceil(train / nsize))
+    step_counter = 0
+
+    # Initialize the neighborhood cache:
+    # 'cache' is a 2D array of shape (num_neurons, num_neurons) where each column will hold a neighborhood vector.
+    cache = np.zeros((num_neurons, num_neurons), dtype=np.float32)
+    # 'cache_valid' keeps track of which neuron's neighborhood vector is valid.
+    cache_valid = np.zeros(num_neurons, dtype=bool)
+
+    # Build the 2D coordinate lookup table.
+    coord_lookup = np.zeros((num_neurons, 2), dtype=np.int32)
+    for i in range(num_neurons):
+        coord_lookup[i, :] = np.array(coord2D(i, xdim))
+    
+    # Training loop over epochs.
+    for epoch in range(train):
+        step_counter += 1
+        if step_counter == nsize_step:
+            step_counter = 0
+            nsize -= 1
+            # Invalidate all cached neighborhood vectors.
+            cache_valid[:] = False
+
+        # Select a training observation using the provided index order.
+        ix = dtix[epoch]  # dtix should be 0-indexed.
+        
+        # Competitive step:
+        # Compute the difference between every neuron's weight vector and the chosen training sample.
+        diff = neurons - dt[ix, :]  # Broadcasting dt[ix, :] over all neurons.
+        # Compute squared Euclidean distances.
+        s = np.sum(diff**2, axis=1)
+        # Determine the index 'c' of the neuron with the smallest distance.
+        c = np.argmin(s)
+        
+        # Update step:
+        # Compute (and cache) the neighborhood vector for the winning neuron.
+        Gamma(cache, cache_valid, coord_lookup, nsize, xdim, ydim, c)
+        # Compute a time-varying factor beta (decreases with epochs).
+        beta = 1.0 - (epoch + 1) / train  # Note: Fortran epochs start at 1.
+        # Update each neuron's weight vector.
+        # The update is: neuron = neuron - (neighborhood_value * alpha * beta) * diff.
+        neurons = neurons - (cache[:, c][:, np.newaxis] * alpha * beta) * diff
+
+    return neurons
 
 # test code
 if __name__ == "__main__":
-   # Load the iris dataset
-   iris = pd.read_csv('iris.csv')
-   print(iris.head())
+    from sklearn import datasets
+    import time
 
-   # Separate the features and the labels
-   df = iris.drop(columns=['id','Species'])
-   labels = iris[['Species']]
+    iris = datasets.load_iris()
+    X = pd.DataFrame(iris.data, columns=iris.feature_names)
+    y = pd.DataFrame(iris.target_names[iris.target],columns=['species'])
 
-   # Build the map
-   som_map = map_build(df, labels=labels, xdim=20, ydim=15, alpha=0.3, train=1000000, normalize=False, seed=42)
+    # Build the map
+    start = time.time()
+    som_map = map_build(X, labels=y, xdim=20, ydim=15, train=1000000, seed=42)
+    end = time.time()
+    print(f"Time elapsed: {end - start} seconds")
 
-   # Print summary
-   map_summary(som_map)
+    map_summary(som_map)
+    map_starburst(som_map)
+    print(map_significance(som_map))
+    map_marginal(som_map,2)
+    v = map_summary(som_map, verb=False)
+    print(v['quality_assessments']['convergence'].iloc[0])
+    print(som_map['unique_centroids'])
 
-   # Display starburst (heat map)
-   map_starburst(som_map)
-
-   map_significance(som_map)
-   map_marginal(som_map,"Petal.Length")

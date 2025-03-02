@@ -1,3 +1,5 @@
+useDynLib(popsom7, .registration = TRUE)
+
 import(graphics,ggplot2)
 
 importFrom("grDevices", "heat.colors")

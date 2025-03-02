@@ -1,6 +1,7 @@
 # popsom7
 
-**popsom7** is a Python package that provides a collection of routines for constructing and evaluating self-organizing maps. The functionality includes:
+**popsom7** is a Python package that provides a collection of routines for constructing and evaluating self-organizing maps. It also has a sklearn compatible
+interface.  The functionality includes:
 
 - Building a SOM with customizable dimensions and training parameters.
 - Generating summary statistics for the SOM.
@@ -18,29 +19,29 @@ pip install popsom7
 ```
 
 ## Usage
-Below is a quick example:
+Below is a quick example using the popsom `sklearnapi` interface.  Popsom also supports
+an interface similar to the popsom R release.  For more details please see the project [homepage](https://github.com/lutzhamel/popsom7) 
 
 ```python
-import pandas as pd
-from popsom7 import maputils
+   from popsom7.sklearnapi import SOM
+   import pandas as pd
+   from sklearn import datasets
 
-# Load your data (for example, a CSV file)
-data = pd.read_csv('iris.csv')
+   iris = datasets.load_iris()
+   X = pd.DataFrame(iris.data, columns=iris.feature_names)
+   y = pd.DataFrame(iris.target_names[iris.target],columns=['species'])
 
-# Optionally, separate out labels if available
-labels = data[['Species']]
-data = data.drop(columns=['id','Species'])
+   # Create and fit the SOM model
+   som = SOM(xdim=20, ydim=15, train=100000, seed=42).fit(X, y)
 
-# Build the SOM
-som_map = maputils.map_build(data, labels=labels, xdim=15, ydim=10, alpha=0.3, train=10000, seed=42)
+   # View a summary of the SOM
+   som.summary()
 
-# Print a summary of the map
-maputils.map_summary(som_map)
+   # Display the starburst (heat map) representation
+   som.starburst()
 
-# Display the starburst (heat map) visualization
-maputils.map_starburst(som_map)
+   # Display feature significance and a marginal plots
+   print(som.significance())
+   som.marginal(2)
 ```
 
-## Documentation
-
-Documentation of the API can be found [here](https://github.com/lutzhamel/popsom7/blob/master/Python/man/documentation.md)

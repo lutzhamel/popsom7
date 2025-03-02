@@ -6,7 +6,10 @@
 
 An implementation of Kohonen's self-organizing maps with a number of distinguishing features:
 
-1. An easy to use interface for building and evaluating self-organizing maps.
+1. Easy to use interfaces for building and evaluating self-organizing maps:
+   * An interface that works the same on both the R and the Python platforms
+   * An interface that is sklearn compatible, allowing you to leverage the power
+     and convenience of the sklearn framework.
 
 2. Automatic centroid detection and visualization using starbursts.
 
@@ -20,6 +23,8 @@ Other documents:
 
 * For an example in R check this [notebook on Kaggle](https://www.kaggle.com/lutzhamel/customer-segmentation-with-soms).
 
-* The Python documentation can be found [here](https://github.com/lutzhamel/popsom7/blob/master/Python/man/documentation.md).
+* The documentation for the Python API inspired by the R implementation  can be found [here](https://github.com/lutzhamel/popsom7/blob/master/Python/man/maputils.md).
+
+* The documentation for the sklearn compatible Python API  can be found [here](https://github.com/lutzhamel/popsom7/blob/master/Python/man/sklearnapi.md).
 
 * For the R documentation as part of CRAN check [here](https://CRAN.R-project.org/package=popsom7).
