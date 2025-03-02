@@ -1,0 +1,444 @@
+<h1 id="popsom-python-interface-functions">Popsom Python Interface
+Functions</h1>
+<p>This interface is modeled after the R interface to popsom. For a more
+object-oriented approach see the documentation on the sklearn API.</p>
+<h2 id="map_build">map_build</h2>
+<h3 id="description">Description</h3>
+<p>Construct a self-organizing map and return an object of class
+<code>map</code>.</p>
+<h3 id="usage">Usage</h3>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>map_build(data, labels <span class="op">=</span> <span class="va">None</span>, xdim <span class="op">=</span> <span class="dv">10</span>, ydim <span class="op">=</span> <span class="dv">5</span>,</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>          alpha <span class="op">=</span> <span class="fl">0.3</span>, train <span class="op">=</span> <span class="dv">1000</span>, normalize <span class="op">=</span> <span class="va">False</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>          seed <span class="op">=</span> <span class="va">None</span>, minimal <span class="op">=</span> <span class="va">False</span>)</span></code></pre></div>
+<h3 id="arguments">Arguments</h3>
+<ul>
+<li><strong>data</strong>: A dataframe where each row contains an
+unlabeled training instance.</li>
+<li><strong>labels</strong>: A vector or dataframe with one label for
+each observation in data.</li>
+<li><strong>xdim</strong>: The x-dimension of the map.</li>
+<li><strong>ydim</strong>: The y-dimension of the map.</li>
+<li><strong>alpha</strong>: The learning rate, should be a value greater
+than zero and less or equal to one.</li>
+<li><strong>train</strong>: The number of training iterations.</li>
+<li><strong>normalize</strong>: Boolean switch indicating whether or not
+to normalize the data.</li>
+<li><strong>seed</strong>: A seed value for repeatability of random
+initialization and selection.</li>
+<li><strong>minimal</strong>: Boolean switch indicating whether to build
+a <code>map_minimal</code> or <code>map</code> object.</li>
+</ul>
+<h3 id="details">Details</h3>
+<p>The function <code>map_build</code> constructs an object of type
+<code>map</code>. The object contains two models: 1.
+<strong>Self-organizing map model:</strong> Expressed through its
+trained neurons. The quality of the fit can be ascertained by the
+<code>convergence</code> measure. 2. <strong>Cluster model:</strong>
+Expressed by the discovered centroids. The quality of this model is
+determined by the <code>map convergence</code>,
+<code>within cluster sum of squares</code> (wcss), and the
+<code>between cluster sum of squares</code> (bcss).</p>
+<h3 id="value">Value</h3>
+<p>An object of type <code>map</code> with the following member
+fields:</p>
+<ul>
+<li><strong>data</strong>: Data frame containing the possibly normalized
+training data.</li>
+<li><strong>labels</strong>: Vector of labels, one for each observation
+in data or <code>NULL</code> if no labels were given.</li>
+<li><strong>xdim</strong>: The x-dimension of the neuron map.</li>
+<li><strong>ydim</strong>: The y-dimension of the neuron map.</li>
+<li><strong>alpha</strong>: The given learning rate for the neural
+network.</li>
+<li><strong>train</strong>: The number of training iterations applied to
+the neural network.</li>
+<li><strong>neurons</strong>: A list (data frame) of neurons for the
+network. Its dimensionality is the same as the training data. Two useful
+formulas:
+<ul>
+<li><p>To compute the (x,y) coordinate for the neuron in row
+<code>rowix</code>:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> (rowix <span class="op">-</span> <span class="dv">1</span>) <span class="op">%</span> <span class="bu">map</span>[<span class="st">&#39;xdim&#39;</span>] <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> (rowix <span class="op">-</span> <span class="dv">1</span>) <span class="op">//</span> <span class="bu">map</span>[<span class="st">&#39;xdim&#39;</span>] <span class="op">+</span> <span class="dv">1</span></span></code></pre></div></li>
+<li><p>To compute the row index from the (x,y)-position:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>rowix <span class="op">=</span> x <span class="op">+</span> (y <span class="op">-</span> <span class="dv">1</span>) <span class="op">*</span> <span class="bu">map</span>[<span class="st">&#39;xdim&#39;</span>]</span></code></pre></div></li>
+</ul></li>
+<li><strong>heat</strong>: The representation of the map used for the
+<code>starburst</code> plot.</li>
+<li><strong>fitted.obs</strong>: A list of indexes of the best matching
+neuron for each observation (row index into the <code>neurons</code>
+data frame).</li>
+<li><strong>centroids</strong>: A data frame of (x,y)-locations
+indicating where each centroid is located. (Each centroid points to
+itself.)</li>
+<li><strong>unique.centroids</strong>: A vector of unique centroid
+(x,y)-locations. (Hint: the length of this vector equals the number of
+clusters.)</li>
+<li><strong>centroid.labels</strong>: A data frame mapping
+(x,y)-locations of actual centroids to their labels. If the training
+data is unlabeled, popsom generates a label for each centroid.</li>
+<li><strong>label.to.centroid</strong>: A lookup table (hash) mapping
+labels to centroid indexes. Note that a label may be associated with
+multiple centroids.</li>
+<li><strong>centroid.obs</strong>: A vector of lists of observations per
+centroid (indexed by the centroid number from
+<code>unique_centroids</code>). Each list contains row numbers from the
+<code>data</code> dataframe.</li>
+<li><strong>convergence</strong>: A quality measure indicating how well
+the map fits the training data.</li>
+<li><strong>wcss</strong>: The average “within cluster sum of squares”
+(variance within clusters).</li>
+<li><strong>bcss</strong>: The “between cluster sum of squares”
+(variance between cluster centroids).</li>
+</ul>
+<h3 id="notes">Notes</h3>
+<ul>
+<li>If the <code>minimal</code> switch is set to <code>True</code>, then
+a <code>map_minimal</code> object is returned. This object only contains
+the trained neurons and the training parameters. Note that none of the
+more involved functions will work with this type of object.</li>
+<li>If your training data is unlabeled, popsom will automatically
+generate a label for each discovered centroid.</li>
+</ul>
+<h3 id="references">References</h3>
+<ul>
+<li><strong>VSOM: Efficient, Stochastic Self-Organizing Map
+Training</strong><br />
+Lutz Hamel, <em>Intelligent Systems Conference (IntelliSys) 2018</em>,
+K. Arai et al. (Eds.): Intelligent Systems and Applications, Advances in
+Intelligent Systems and Computing 869, pp. 805-821, Springer, 2018.</li>
+<li><strong>Self-Organizing Map Convergence</strong><br />
+Robert Tatoian and Lutz Hamel, <em>Proceedings of the 2016 International
+Conference on Data Mining (DMIN’16)</em>, pp. 92-98, July 25-28, 2016,
+Las Vegas, Nevada, USA, ISBN: 1-60132-431-6, CSREA Press.</li>
+<li><strong>Evaluating Self-Organizing Map Quality Measures as
+Convergence Criteria</strong><br />
+Gregory Breard and Lutz Hamel, <em>Proceedings of the 2018 International
+Conference on Data Science (ICDATA’18)</em>, Robert Stahlbock, Gary M.
+Weiss, Mahmoud Abou-Nasr (Eds.), ISBN: 1-60132-481-2, pp. 86-92, CSREA
+Press, 2018.</li>
+<li><strong>SOM Quality Measures: An Efficient Statistical
+Approach</strong><br />
+Lutz Hamel, <em>Proceedings of the 11th International Workshop WSOM
+2016</em>, Houston, Texas, USA, E. Merenyi et al. (Eds.), Advances in
+Self-Organizing Maps and Learning Vector Quantization, Advances in
+Intelligent Systems and Computing 428, Springer, pp. 49-59, DOI
+10.1007/978-3-319-28518-4_4, 2016.</li>
+</ul>
+<h3 id="examples">Examples</h3>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> popsom7 <span class="im">import</span> maputils</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn <span class="im">import</span> datasets</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>iris <span class="op">=</span> datasets.load_iris()</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> pd.DataFrame(iris.data, columns<span class="op">=</span>iris.feature_names)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> pd.DataFrame(iris.target_names[iris.target],columns<span class="op">=</span>[<span class="st">&#39;species&#39;</span>])</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">## build a map</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> maputils.map_build(X, y, xdim <span class="op">=</span> <span class="dv">15</span>, ydim <span class="op">=</span> <span class="dv">10</span>, train <span class="op">=</span> <span class="dv">10000</span>, seed <span class="op">=</span> <span class="dv">42</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">## look at the characteristics of the map</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>maputils.map_summary(m)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">## plot the map</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>maputils.map_starburst(m)</span></code></pre></div>
+<hr />
+<h2 id="map_convergence">map_convergence</h2>
+<h3 id="description-1">Description</h3>
+<p>Evaluate the quality of a SOM using embedding accuracy and estimated
+topographical accuracy.</p>
+<h3 id="usage-1">Usage</h3>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>map_convergence(<span class="bu">map</span>, conf_int <span class="op">=</span> <span class="fl">0.95</span>, k <span class="op">=</span> <span class="dv">50</span>, verb <span class="op">=</span> <span class="va">True</span>, ks <span class="op">=</span> <span class="va">True</span>)</span></code></pre></div>
+<h3 id="arguments-1">Arguments</h3>
+<ul>
+<li><strong>map</strong>: An object of type <code>map</code>.</li>
+<li><strong>conf.int</strong>: The confidence interval of the quality
+assessment.</li>
+<li><strong>k</strong>: Number of samples to use in the computation of
+the estimated topographical accuracy.</li>
+<li><strong>verb</strong>: If <code>True</code>, reports the two
+convergence components separately; otherwise, a linear combination of
+the two indices is reported.</li>
+<li><strong>ks</strong>: If <code>True</code>, uses the
+Kolmogorov-Smirnov convergence test; otherwise, a test based on variance
+and means is performed.</li>
+</ul>
+<h3 id="value-1">Value</h3>
+<p>A single value or a pair of values: 1. Embedding accuracy 2.
+Estimated topographic accuracy</p>
+<p>The structure of the return value depends on the <code>verb</code>
+switch.</p>
+<h3 id="references-1">References</h3>
+<ul>
+<li><strong>SOM Quality Measures: An Efficient Statistical
+Approach</strong><br />
+Lutz Hamel, <em>Proceedings of the 11th International Workshop WSOM
+2016</em>, Houston, Texas, USA, E. Merenyi et al. (Eds.), Advances in
+Self-Organizing Maps and Learning Vector Quantization, Advances in
+Intelligent Systems and Computing 428, Springer, pp. 49-59, DOI
+10.1007/978-3-319-28518-4_4, 2016.</li>
+</ul>
+<h3 id="examples-1">Examples</h3>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> popsom7 <span class="im">import</span> maputils</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn <span class="im">import</span> datasets</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>iris <span class="op">=</span> datasets.load_iris()</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> pd.DataFrame(iris.data, columns<span class="op">=</span>iris.feature_names)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> pd.DataFrame(iris.target_names[iris.target],columns<span class="op">=</span>[<span class="st">&#39;species&#39;</span>])</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">## build a map</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> maputils.map_build(X, y, xdim <span class="op">=</span> <span class="dv">15</span>, ydim <span class="op">=</span> <span class="dv">10</span>, train <span class="op">=</span> <span class="dv">1000</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">## map quality</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>maputils.map_convergence(m)</span></code></pre></div>
+<hr />
+<h2 id="map_fitted">map_fitted</h2>
+<h3 id="description-2">Description</h3>
+<p>Computes a vector of labels assigned to each of the observations in
+the training data through the constructed cluster model. If the training
+data is unlabeled, machine-generated labels are used.</p>
+<h3 id="usage-2">Usage</h3>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>map_fitted(<span class="bu">map</span>)</span></code></pre></div>
+<h3 id="arguments-2">Arguments</h3>
+<ul>
+<li><strong>map</strong>: An object of type <code>map</code>.</li>
+</ul>
+<h3 id="value-2">Value</h3>
+<p>A vector of predicted labels, one for each observation in the
+training data.</p>
+<h3 id="examples-2">Examples</h3>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> popsom7 <span class="im">import</span> maputils</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn <span class="im">import</span> datasets</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>iris <span class="op">=</span> datasets.load_iris()</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> pd.DataFrame(iris.data, columns<span class="op">=</span>iris.feature_names)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> pd.DataFrame(iris.target_names[iris.target],columns<span class="op">=</span>[<span class="st">&#39;species&#39;</span>])</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> maputils.map_build(X, y, xdim <span class="op">=</span> <span class="dv">15</span>, ydim <span class="op">=</span> <span class="dv">10</span>, train <span class="op">=</span> <span class="dv">10000</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>fitted_labels <span class="op">=</span> maputils.map_fitted(m)</span></code></pre></div>
+<hr />
+<h2 id="map_marginal">map_marginal</h2>
+<h3 id="description-3">Description</h3>
+<p>Generate a plot that shows the marginal probability distribution of
+the neurons and data.</p>
+<h3 id="usage-3">Usage</h3>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>map_marginal(<span class="bu">map</span>, marginal)</span></code></pre></div>
+<h3 id="arguments-3">Arguments</h3>
+<ul>
+<li><strong>map</strong>: An object of type <code>map</code>.</li>
+<li><strong>marginal</strong>: The name of a training data dimension or
+index.</li>
+</ul>
+<h3 id="examples-3">Examples</h3>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> popsom7 <span class="im">import</span> maputils</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn <span class="im">import</span> datasets</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>iris <span class="op">=</span> datasets.load_iris()</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> pd.DataFrame(iris.data, columns<span class="op">=</span>iris.feature_names)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> pd.DataFrame(iris.target_names[iris.target],columns<span class="op">=</span>[<span class="st">&#39;species&#39;</span>])</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co">## build a map</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> maputils.map_build(X, y, xdim <span class="op">=</span> <span class="dv">15</span>, ydim <span class="op">=</span> <span class="dv">10</span>, train <span class="op">=</span> <span class="dv">10000</span>)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="co">## display marginal distribution of dimension 1</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>maputils.map_marginal(m, <span class="dv">1</span>)</span></code></pre></div>
+<hr />
+<h2 id="map_position">map_position</h2>
+<h3 id="description-4">Description</h3>
+<p>Compute the (x,y)-positions of points on the map.</p>
+<h3 id="usage-4">Usage</h3>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>map_position(<span class="bu">map</span>, points)</span></code></pre></div>
+<h3 id="arguments-4">Arguments</h3>
+<ul>
+<li><strong>map</strong>: An object of type <code>map</code>.</li>
+<li><strong>points</strong>: A data frame of points to be mapped.</li>
+</ul>
+<h3 id="value-3">Value</h3>
+<p>A data frame with (x,y)-positions. The data frame has two columns: -
+<strong>x-dim</strong>: The x-position of the corresponding point in the
+<code>points</code> data frame. - <strong>y-dim</strong>: The y-position
+of the corresponding point in the <code>points</code> data frame.</p>
+<h3 id="examples-4">Examples</h3>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> popsom7 <span class="im">import</span> maputils</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn <span class="im">import</span> datasets</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>iris <span class="op">=</span> datasets.load_iris()</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> pd.DataFrame(iris.data, columns<span class="op">=</span>iris.feature_names)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> pd.DataFrame(iris.target_names[iris.target],columns<span class="op">=</span>[<span class="st">&#39;species&#39;</span>])</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> maputils.map_build(X, y, xdim <span class="op">=</span> <span class="dv">15</span>, ydim <span class="op">=</span> <span class="dv">10</span>, train <span class="op">=</span> <span class="dv">10000</span>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>positions <span class="op">=</span> maputils.map_position(m, X)</span></code></pre></div>
+<hr />
+<h2 id="map_predict">map_predict</h2>
+<h3 id="description-5">Description</h3>
+<p>Compute classification labels for points in a given data frame using
+the underlying clustering model. If the training data is unlabeled,
+machine-generated labels are used.</p>
+<h3 id="usage-5">Usage</h3>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>map_redict(<span class="bu">map</span>, points)</span></code></pre></div>
+<h3 id="arguments-5">Arguments</h3>
+<ul>
+<li><strong>map</strong>: An object of type <code>map</code>.</li>
+<li><strong>points</strong>: A data frame of points to be
+classified.</li>
+</ul>
+<h3 id="value-4">Value</h3>
+<p>A data frame with classification results. The data frame has two
+columns: - <strong>Label</strong>: The assigned label to the observation
+at the same row in the <code>points</code> data frame. -
+<strong>Confidence</strong>: A confidence value assigned to the label
+prediction.</p>
+<h3 id="examples-5">Examples</h3>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> popsom7 <span class="im">import</span> maputils</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn <span class="im">import</span> datasets</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>iris <span class="op">=</span> datasets.load_iris()</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> pd.DataFrame(iris.data, columns<span class="op">=</span>iris.feature_names)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> pd.DataFrame(iris.target_names[iris.target],columns<span class="op">=</span>[<span class="st">&#39;species&#39;</span>])</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> maputils.map_build(X, y, xdim <span class="op">=</span> <span class="dv">15</span>, ydim <span class="op">=</span> <span class="dv">10</span>, train <span class="op">=</span> <span class="dv">10000</span>)</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>y_predict <span class="op">=</span> maputils.map_predict(m, X)</span></code></pre></div>
+<hr />
+<h2 id="map_significance">map_significance</h2>
+<h3 id="description-6">Description</h3>
+<p>Computes the relative significance of each feature and plots it.</p>
+<h3 id="usage-6">Usage</h3>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>map_significance(<span class="bu">map</span>, graphics <span class="op">=</span> <span class="va">False</span>, feature_labels <span class="op">=</span> <span class="va">True</span>)</span></code></pre></div>
+<h3 id="arguments-6">Arguments</h3>
+<ul>
+<li><strong>map</strong>: An object of type <code>map</code>.</li>
+<li><strong>graphics</strong>: A switch that controls whether a plot is
+generated or not.</li>
+<li><strong>feature.labels</strong>: A switch to allow the plotting of
+feature names vs. feature indices.</li>
+</ul>
+<h3 id="value-5">Value</h3>
+<p>If <code>graphics = False</code>, a vector containing the
+significance for each feature is returned.</p>
+<p><strong>Note:</strong> A Bayesian approach is used to compute the
+relative significance of features based on variance.</p>
+<h3 id="references-2">References</h3>
+<ul>
+<li><strong>Bayesian Probability Approach to Feature Significance for
+Infrared Spectra of Bacteria</strong><br />
+Lutz Hamel, Chris W. Brown, <em>Applied Spectroscopy, Volume 66, Number
+1, 2012.</em></li>
+</ul>
+<h3 id="examples-6">Examples</h3>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> popsom7 <span class="im">import</span> maputils</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn <span class="im">import</span> datasets</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>iris <span class="op">=</span> datasets.load_iris()</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> pd.DataFrame(iris.data, columns<span class="op">=</span>iris.feature_names)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> pd.DataFrame(iris.target_names[iris.target],columns<span class="op">=</span>[<span class="st">&#39;species&#39;</span>])</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> maputils.map_build(X, y, xdim <span class="op">=</span> <span class="dv">15</span>, ydim <span class="op">=</span> <span class="dv">10</span>, train <span class="op">=</span> <span class="dv">10000</span>)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="co">## Display the relative feature significance graphically</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>maputils.map_significance(m)</span></code></pre></div>
+<hr />
+<h2 id="map_starburst">map_starburst</h2>
+<h3 id="usage-7">Usage</h3>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>map_starburst(<span class="bu">map</span>)</span></code></pre></div>
+<h3 id="arguments-7">Arguments</h3>
+<ul>
+<li><strong>map</strong>: An object of type <code>map</code>.</li>
+</ul>
+<h3 id="description-7">Description</h3>
+<p>Generate a starburst representation of the clusters on the heat map
+for the self-organizing map model.</p>
+<h3 id="references-3">References</h3>
+<ul>
+<li><strong>Improved Interpretability of the Unified Distance Matrix
+with Connected Components</strong><br />
+Lutz Hamel and Chris W. Brown, <em>Proceedings of the 7th International
+Conference on Data Mining (DMIN’11)</em>, July 18-21, 2011, Las Vegas,
+Nevada, USA, ISBN: 1-60132-168-6, pp. 338-343, CSREA Press, 2011.</li>
+</ul>
+<h3 id="examples-7">Examples</h3>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> popsom7 <span class="im">import</span> maputils</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn <span class="im">import</span> datasets</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>iris <span class="op">=</span> datasets.load_iris()</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> pd.DataFrame(iris.data, columns<span class="op">=</span>iris.feature_names)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> pd.DataFrame(iris.target_names[iris.target],columns<span class="op">=</span>[<span class="st">&#39;species&#39;</span>])</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> maputils.map_build(X, y, xdim <span class="op">=</span> <span class="dv">15</span>, ydim <span class="op">=</span> <span class="dv">10</span>, train <span class="op">=</span> <span class="dv">10000</span>)</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>maputils.map_starburst(m)</span></code></pre></div>
+<hr />
+<h2 id="map_summary">map_summary</h2>
+<h3 id="description-8">Description</h3>
+<p>Generate a summary object for <code>map</code> objects.</p>
+<h3 id="usage-8">Usage</h3>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>map_summary(<span class="bu">map</span>, verb <span class="op">=</span> <span class="va">True</span>)</span></code></pre></div>
+<h3 id="arguments-8">Arguments</h3>
+<ul>
+<li><strong>map</strong>: An object of type <code>map</code>.</li>
+<li><strong>verb</strong>: A switch controlling the output.</li>
+</ul>
+<h3 id="value-6">Value</h3>
+<p>An object of type <code>summary_map</code> containing two structures:
+- <strong>training.parameters</strong>: A dataframe containing the
+parameters used to train the map. -
+<strong>quality.assessments</strong>: A dataframe containing the quality
+assessments of the map. In particular, it includes: -
+<strong>convergence</strong>: A linear combination of variance capture
+and topographic fidelity. A value close to 1 indicates a converged map.
+- <strong>separation</strong>: Computed as <code>1 - wcss / bcss</code>,
+where a value close to 1 indicates well-separated clusters.</p>
+<p>If <code>verb</code> is <code>True</code>, the
+<code>summary_map</code> object is formatted and printed to the screen;
+otherwise, it is returned as a data structure.</p>
+<h3 id="references-4">References</h3>
+<ul>
+<li><strong>Self-Organizing Map Convergence</strong><br />
+Robert Tatoian and Lutz Hamel, <em>Proceedings of the 2016 International
+Conference on Data Mining (DMIN’16)</em>, pp. 92-98, July 25-28, 2016,
+Las Vegas, Nevada, USA, ISBN: 1-60132-431-6, CSREA Press.</li>
+</ul>
+<h3 id="examples-8">Examples</h3>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> popsom7 <span class="im">import</span> maputils</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn <span class="im">import</span> datasets</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>iris <span class="op">=</span> datasets.load_iris()</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> pd.DataFrame(iris.data, columns<span class="op">=</span>iris.feature_names)</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> pd.DataFrame(iris.target_names[iris.target],columns<span class="op">=</span>[<span class="st">&#39;species&#39;</span>])</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="co">## build a map</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> maputils.map_build(X, y, xdim <span class="op">=</span> <span class="dv">15</span>, ydim <span class="op">=</span> <span class="dv">10</span>, train <span class="op">=</span> <span class="dv">10000</span>)</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="co">## compute a summary object and display it</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> maputils.map_summary(m, verb <span class="op">=</span> <span class="va">False</span>)</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(s)</span></code></pre></div>
