@@ -58,7 +58,7 @@ som.marginal(2)
 ## Attributes
 
 - **som_map_** : *dict*  
-  The fitted SOM model.  For details on the map object check the documentation of the function `map_build` [here](https://github.com/lutzhamel/popsom7/blob/master/Python/man/maputils.md)).
+  The fitted SOM model.  For details on the map object check the documentation of the function `map_build` [here](https://github.com/lutzhamel/popsom7/blob/master/Python/man/maputils.md).
 
 ## Methods
 
