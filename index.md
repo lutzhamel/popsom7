@@ -20,6 +20,8 @@ An implementation of self-organizing maps (SOMs) with a number of distinguishing
 
 1. A number of easily accessible quality metrics.
 
+1. An implementation of the training algorithm based on tensor algebra.
+
 ## Example Code
 
 Here is a simple example written in the sklearn compatible API,
