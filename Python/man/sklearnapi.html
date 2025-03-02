@@ -1,0 +1,252 @@
+<h1 id="som-scikit-learn-style-wrapper-for-self-organizing-maps">SOM:
+scikit-learn Style Wrapper for Self-Organizing Maps</h1>
+<h2 id="description">Description</h2>
+<p>The <code>SOM</code> class is a scikit-learn compatible estimator
+that wraps the self-organizing map (SOM) routines defined in
+<code>map_utils.py</code>. It builds a SOM from the training data and—if
+labels (<code>y</code>) are provided—uses them for reporting (for
+example, via majority voting within clusters). In the absence of labels,
+clusters are assigned numeric labels automatically.</p>
+<h2 id="usage">Usage</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> popsom7.sklearnapi <span class="im">import</span> SOM</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn <span class="im">import</span> datasets</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>iris <span class="op">=</span> datasets.load_iris()</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> pd.DataFrame(iris.data, columns<span class="op">=</span>iris.feature_names)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> pd.DataFrame(iris.target_names[iris.target],columns<span class="op">=</span>[<span class="st">&#39;species&#39;</span>])</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize the SOM model with desired parameters</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>som <span class="op">=</span> SOM(xdim<span class="op">=</span><span class="dv">20</span>, ydim<span class="op">=</span><span class="dv">15</span>, train<span class="op">=</span><span class="dv">100000</span>, seed<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit the SOM model</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>som.fit(X, y)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Predict cluster labels</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(som.predict(X).head())</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Map samples to their (x, y) coordinates on the SOM grid</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(som.transform(X).head())</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Display a summary of training parameters and quality assessments</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>som.summary()</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize the SOM using a starburst (heat map) representation</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>som.starburst()</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute the feature significances</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(som.significance())</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Display a density (marginal) plot for a specific feature</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>som.marginal(<span class="dv">2</span>)</span></code></pre></div>
+<h2 id="class-parameters">Class Parameters</h2>
+<ul>
+<li><strong>xdim</strong> : <em>int, default=10</em><br />
+Number of neurons along the x-dimension of the map.</li>
+<li><strong>ydim</strong> : <em>int, default=5</em><br />
+Number of neurons along the y-dimension of the map.</li>
+<li><strong>alpha</strong> : <em>float, default=0.3</em><br />
+Learning rate, where 0 &lt; alpha ≤ 1.</li>
+<li><strong>train</strong> : <em>int, default=1000</em><br />
+Number of training iterations.</li>
+<li><strong>normalize</strong> : <em>bool, default=False</em><br />
+Indicates whether the input data should be normalized by row.</li>
+<li><strong>seed</strong> : <em>int or None, default=None</em><br />
+Seed value for reproducibility.</li>
+</ul>
+<h2 id="attributes">Attributes</h2>
+<ul>
+<li><strong>som_map_</strong> : <em>dict</em><br />
+The fitted SOM model. For details on the map object check the
+documentation of the function <code>map_build</code> <a
+href="https://lutzhamel.github.io/popsom7/Python/man/sklearnapi.html">here</a>.</li>
+</ul>
+<h2 id="methods">Methods</h2>
+<h3
+id="init__xdim10-ydim5-alpha0.3-train1000-normalizefalse-seednone">__init__(xdim=10,
+ydim=5, alpha=0.3, train=1000, normalize=False, seed=None)</h3>
+<p><strong>Description:</strong><br />
+Initializes the SOM instance with the specified parameters.</p>
+<p><strong>Usage:</strong><br />
+Called automatically when creating a new <code>SOM</code> object.</p>
+<hr />
+<h3 id="fitx-ynone">fit(X, y=None)</h3>
+<p><strong>Description:</strong><br />
+Fits the SOM model using the provided training data.</p>
+<p><strong>Usage:</strong></p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>som.fit(X, y)</span></code></pre></div>
+<p><strong>Arguments:</strong></p>
+<ul>
+<li><strong>X</strong> : array-like or <code>pd.DataFrame</code>, shape
+<em>(n_samples, n_features)</em><br />
+Training data.</li>
+<li><strong>y</strong> : array-like or <code>pd.DataFrame</code>, shape
+<em>(n_samples,)</em> or <em>(n_samples, 1)</em>, default=None<br />
+Optional labels for the training data (used for reporting).</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><code>self</code> : SOM instance<br />
+The fitted model.</li>
+</ul>
+<hr />
+<h3 id="fit_predictx-ynone">fit_predict(X, y=None)</h3>
+<p><strong>Description:</strong><br />
+Fits the SOM model and returns cluster assignments for the training
+data.</p>
+<p><strong>Usage:</strong></p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> som.fit_predict(X, y)</span></code></pre></div>
+<p><strong>Arguments:</strong></p>
+<ul>
+<li><strong>X</strong> : array-like or <code>pd.DataFrame</code>, shape
+<em>(n_samples, n_features)</em><br />
+Training data.</li>
+<li><strong>y</strong> : array-like or <code>pd.DataFrame</code>,
+default=None<br />
+Optional labels for the training data.</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><code>labels</code> : array-like<br />
+Cluster labels for each training sample.</li>
+</ul>
+<hr />
+<h3 id="predictx">predict(X)</h3>
+<p><strong>Description:</strong><br />
+Maps new samples to clusters using the fitted SOM model.</p>
+<p><strong>Usage:</strong></p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>predicted_labels <span class="op">=</span> som.predict(X)</span></code></pre></div>
+<p><strong>Arguments:</strong></p>
+<ul>
+<li><strong>X</strong> : array-like or <code>pd.DataFrame</code>, shape
+<em>(n_samples, n_features)</em><br />
+New data to be classified.</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><code>labels</code> : <code>pd.Series</code> or list<br />
+Cluster labels assigned to each sample.</li>
+</ul>
+<p><strong>Notes:</strong><br />
+Raises a <code>ValueError</code> if the model has not been fitted.</p>
+<hr />
+<h3 id="transformx">transform(X)</h3>
+<p><strong>Description:</strong><br />
+Maps input samples to their corresponding (x, y) positions on the SOM
+grid.</p>
+<p><strong>Usage:</strong></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>positions <span class="op">=</span> som.transform(X)</span></code></pre></div>
+<p><strong>Arguments:</strong></p>
+<ul>
+<li><strong>X</strong> : array-like or <code>pd.DataFrame</code>, shape
+<em>(n_samples, n_features)</em><br />
+New data.</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><code>positions</code> : <code>pd.DataFrame</code><br />
+A DataFrame with columns <code>"x-dim"</code> and <code>"y-dim"</code>
+indicating the grid positions.</li>
+</ul>
+<hr />
+<h3 id="summaryverbosetrue">summary(verbose=True)</h3>
+<p><strong>Description:</strong><br />
+Prints and returns a summary of the SOM training parameters and quality
+assessments.</p>
+<p><strong>Usage:</strong></p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>summary_info <span class="op">=</span> som.summary(verbose<span class="op">=</span><span class="va">True</span>)</span></code></pre></div>
+<p><strong>Arguments:</strong></p>
+<ul>
+<li><strong>verbose</strong> : <em>bool, default=True</em><br />
+If <code>True</code>, prints the summary to the screen.</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><code>summary_info</code> : <em>dict</em><br />
+A dictionary containing summary information about the SOM model.</li>
+</ul>
+<hr />
+<h3 id="starburst">starburst()</h3>
+<p><strong>Description:</strong><br />
+Displays a starburst (heat map) representation of the SOM, visualizing
+clusters on the map.</p>
+<p><strong>Usage:</strong></p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>som.starburst()</span></code></pre></div>
+<hr />
+<h3
+id="significancegraphicstrue-feature_labelstrue">significance(graphics=True,
+feature_labels=True)</h3>
+<p><strong>Description:</strong><br />
+Computes the relative significance of each feature and optionally
+generates a plot.</p>
+<p><strong>Usage:</strong></p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>sig_values <span class="op">=</span> som.significance(graphics<span class="op">=</span><span class="va">True</span>, feature_labels<span class="op">=</span><span class="va">True</span>)</span></code></pre></div>
+<p><strong>Arguments:</strong></p>
+<ul>
+<li><strong>graphics</strong> : <em>bool, default=True</em><br />
+If <code>True</code>, produces a plot.</li>
+<li><strong>feature_labels</strong> : <em>bool, default=True</em><br />
+If <code>True</code>, uses feature names in the plot.</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><code>significance</code> : array-like or None<br />
+A vector of feature significance values (if <code>graphics</code> is
+<code>False</code>).</li>
+</ul>
+<hr />
+<h3 id="marginalmarginal">marginal(marginal)</h3>
+<p><strong>Description:</strong><br />
+Displays a density plot for a chosen dimension overlaid with neuron
+density.</p>
+<p><strong>Usage:</strong></p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>som.marginal(marginal)</span></code></pre></div>
+<p><strong>Arguments:</strong></p>
+<ul>
+<li><strong>marginal</strong> : <em>int or str</em><br />
+The index or name of the data frame column to be visualized.</li>
+</ul>
+<hr />
+<h2 id="example">Example</h2>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> som_module <span class="im">import</span> SOM</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Load dataset (e.g., the Iris dataset)</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>iris <span class="op">=</span> pd.read_csv(<span class="st">&#39;iris.csv&#39;</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> iris.drop(columns<span class="op">=</span>[<span class="st">&#39;id&#39;</span>, <span class="st">&#39;Species&#39;</span>])</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> iris[[<span class="st">&#39;Species&#39;</span>]]  <span class="co"># Optional: for reporting purposes</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Create and fit the SOM model</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>som <span class="op">=</span> SOM(xdim<span class="op">=</span><span class="dv">20</span>, ydim<span class="op">=</span><span class="dv">15</span>, alpha<span class="op">=</span><span class="fl">0.3</span>, train<span class="op">=</span><span class="dv">100000</span>, seed<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>som.fit(X, y)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Display a summary of the SOM model</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>som.summary()</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Get cluster assignments for the training data</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> som.fit_predict(X, y)</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Predict clusters for new data</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>predicted_labels <span class="op">=</span> som.predict(X)</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Obtain the grid positions of data samples</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>positions <span class="op">=</span> som.transform(X)</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize the SOM with a starburst plot</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>som.starburst()</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot feature significance</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>sig_values <span class="op">=</span> som.significance()</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate a marginal plot for a specific feature</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>som.marginal(<span class="st">&quot;Petal.Length&quot;</span>)</span></code></pre></div>

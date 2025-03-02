@@ -1,14 +1,22 @@
-# popsom7
+# Popsom7
 
-**popsom7** is a Python package that provides a collection of routines for constructing and evaluating self-organizing maps. It also has a sklearn compatible
-interface.  The functionality includes:
+## Overview
 
-- Building a SOM with customizable dimensions and training parameters.
-- Generating summary statistics for the SOM.
-- Visualizing the map (e.g., starburst/heat map display).
-- Assessing feature significance and marginal density plots among other quality measures.
-- Predicting classifications and positions for new data points.
-- Ease of use and easily accessible data models are one of the  hallmarks of this module.
+A fast, user-friendly implementation of self-organizing maps (SOMs) with a number of distinguishing features:
+
+1. Support for both Python and R.
+
+1. Easy to use interfaces for building and evaluating self-organizing maps:
+   * An interface that works the same on both the R and the Python platforms
+   * An interface that is **sklearn compatible**, allowing you to leverage the power
+     and convenience of the sklearn framework in Python.
+
+1. Automatic centroid detection and visualization using starbursts.
+
+1. Two models of the data: (a) a self organizing map model, (b) a centroid based clustering model.
+
+1. A number of easily accessible quality metrics.
+
 
 ## Installation
 

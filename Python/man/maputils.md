@@ -1,7 +1,7 @@
 # Popsom Python Interface Functions
 
 This interface is modeled after the R interface to popsom.  For a more object-oriented
-approach see the documentation on the sklearn API.
+approach see the documentation on the [sklearn API](https://lutzhamel.github.io/popsom7/Python/man/sklearnapi.html).
 
 ## map_build
 

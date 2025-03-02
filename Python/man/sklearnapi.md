@@ -58,11 +58,11 @@ som.marginal(2)
 ## Attributes
 
 - **som_map_** : *dict*  
-  The fitted SOM model.  For details on the map object check the documentation of the function `map_build` [here](https://github.com/lutzhamel/popsom7/blob/master/Python/man/maputils.md).
+  The fitted SOM model.  For details on the map object check the documentation of the function `map_build` [here](https://lutzhamel.github.io/popsom7/Python/man/sklearnapi.html).
 
 ## Methods
 
-### __init__(xdim=10, ydim=5, alpha=0.3, train=1000, normalize=False, seed=None)
+### \_\_init__(xdim=10, ydim=5, alpha=0.3, train=1000, normalize=False, seed=None)
 
 **Description:**  
 Initializes the SOM instance with the specified parameters.
