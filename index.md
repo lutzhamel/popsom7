@@ -1,32 +1,63 @@
-# Popsom7
+# A Fast, User-friendly Implementation of Self-Organizing Maps
 
-### A User-friendly Implementation of Kohonen's Self-Organizing Maps
-
-(this is index.md)
 
 ![](https://raw.githubusercontent.com/lutzhamel/popsom7/master/map.png)
 
-An implementation of Kohonen's self-organizing maps with a number of distinguishing features:
+## Overview
+
+An implementation of self-organizing maps (SOMs) with a number of distinguishing features:
+
+1. Support for both Python and R.
 
 1. Easy to use interfaces for building and evaluating self-organizing maps:
    * An interface that works the same on both the R and the Python platforms
-   * An interface that is sklearn compatible, allowing you to leverage the power
-     and convenience of the sklearn framework.
+   * An interface that is **sklearn compatible**, allowing you to leverage the power
+     and convenience of the sklearn framework in Python.
 
-2. Automatic centroid detection and visualization using starbursts.
+1. Automatic centroid detection and visualization using starbursts.
 
-3. Two models of the data: (a) a self organizing map model, (b) a centroid based clustering model.
+1. Two models of the data: (a) a self organizing map model, (b) a centroid based clustering model.
 
-4. A number of easily accessible quality metrics for the self organizing map and the centroid based cluster model.
+1. A number of easily accessible quality metrics.
 
-Other documents: 
+## Example Code
 
-* For a worked Python example check this [notebook on Kaggle](https://www.kaggle.com/code/lutzhamel/clustering-with-python-popsom7).
+Here is a simple example written in the sklearn compatible API,
+```python
+   from popsom7.sklearnapi import SOM
+   import pandas as pd
+   from sklearn import datasets
 
-* For an example in R check this [notebook on Kaggle](https://www.kaggle.com/lutzhamel/customer-segmentation-with-soms).
+   iris = datasets.load_iris()
+   X = pd.DataFrame(iris.data, columns=iris.feature_names)
+   y = pd.DataFrame(iris.target_names[iris.target],columns=['species'])
 
-* The documentation for the Python API inspired by the R implementation  can be found [here](https://lutzhamel.github.io/popsom7/Python/man/maputils.md).
+   # Create and fit the SOM model
+   som = SOM(xdim=20, ydim=15, train=100000, seed=42).fit(X, y)
 
-* The documentation for the sklearn compatible Python API  can be found [here](https://lutzhamel.github.io/popsom7/Python/man/sklearnapi.md).
+   # View a summary of the SOM
+   som.summary()
 
-* For the R documentation as part of CRAN check [here](https://CRAN.R-project.org/package=popsom7).
+   # Display the starburst (heat map) representation
+   som.starburst()
+
+   # Display feature significance and a marginal plots
+   print(som.significance())
+   som.marginal(2)
+```
+
+## Documentation
+
+* The documentation for the [sklearn compatible Python API](https://lutzhamel.github.io/popsom7/Python/man/sklearnapi.html).
+
+* The documentation for the [Python API based on the R implementation](https://lutzhamel.github.io/popsom7/Python/man/maputils.html).
+
+* The [R documentation as part of CRAN](https://cran.r-project.org/web/packages/popsom7/popsom7.pdf).
+
+
+## Worked Example Jupyter Notebooks
+
+* [Python notebook](https://www.kaggle.com/code/lutzhamel/clustering-with-python-popsom7).
+
+* [R notebook on Kaggle](https://www.kaggle.com/lutzhamel/customer-segmentation-with-soms).
+
