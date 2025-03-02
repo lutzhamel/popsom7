@@ -22,7 +22,7 @@ The main utilities available in this file are:
     map_marginal ----- displays a density plot of a training dataframe dimension
                          overlayed with the neuron density for that same dimension or index.
     
-License: MIT License
+License: GNU License
 """
 
 import numpy as np
@@ -87,7 +87,10 @@ def map_build(data, labels=None, xdim=10, ydim=5, alpha=0.3, train=1000, normali
         raise ValueError("train value has to be a positive integer value")
     
     # Train the neural network using vsom_r
-    neurons_array = vsom(data, xdim, ydim, alpha, train)
+    # from datetime import datetime
+    # now = datetime.now()
+    neurons_array = vsom_opt(data, xdim, ydim, alpha, train)
+    # print(datetime.now()-now)
     neurons = pd.DataFrame(neurons_array, columns=data.columns)
     
     # Construct the map object as a dictionary
