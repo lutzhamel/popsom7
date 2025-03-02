@@ -25,8 +25,8 @@ Other documents:
 
 * For an example in R check this [notebook on Kaggle](https://www.kaggle.com/lutzhamel/customer-segmentation-with-soms).
 
-* The documentation for the Python API inspired by the R implementation  can be found [here](https://github.com/lutzhamel/popsom7/blob/master/Python/man/maputils.md).
+* The documentation for the Python API inspired by the R implementation  can be found [here](https://lutzhamel.github.io/popsom7/Python/man/maputils.md).
 
-* The documentation for the sklearn compatible Python API  can be found [here](https://github.com/lutzhamel/popsom7/blob/master/Python/man/sklearnapi.md).
+* The documentation for the sklearn compatible Python API  can be found [here](https://lutzhamel.github.io/popsom7/Python/man/sklearnapi.md).
 
 * For the R documentation as part of CRAN check [here](https://CRAN.R-project.org/package=popsom7).
