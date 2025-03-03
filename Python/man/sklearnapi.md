@@ -1,7 +1,7 @@
 <!-- 
 convert this document to pdf with: pandoc -f markdown -t pdf -o sklearnapi.pdf sklearnapi.md
 -->
-# sklearnapi: scikit-learn Style Module for Self-Organizing Maps
+# sklearnapi: scikit-learn Style Module for Popsom
 
 ## Description - The SOM Class
 
@@ -230,43 +230,4 @@ som.marginal(marginal)
 
 - **marginal** : *int or str*  
   The index or name of the data frame column to be visualized.
-
----
-
-## Example
-
-```python
-import pandas as pd
-from som_module import SOM
-
-# Load dataset (e.g., the Iris dataset)
-iris = pd.read_csv('iris.csv')
-X = iris.drop(columns=['id', 'Species'])
-y = iris[['Species']]  # Optional: for reporting purposes
-
-# Create and fit the SOM model
-som = SOM(xdim=20, ydim=15, alpha=0.3, train=100000, seed=42)
-som.fit(X, y)
-
-# Display a summary of the SOM model
-som.summary()
-
-# Get cluster assignments for the training data
-labels = som.fit_predict(X, y)
-
-# Predict clusters for new data
-predicted_labels = som.predict(X)
-
-# Obtain the grid positions of data samples
-positions = som.transform(X)
-
-# Visualize the SOM with a starburst plot
-som.starburst()
-
-# Plot feature significance
-sig_values = som.significance()
-
-# Generate a marginal plot for a specific feature
-som.marginal("Petal.Length")
-```
 
