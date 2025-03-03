@@ -89,7 +89,7 @@ def map_build(data, labels=None, xdim=10, ydim=5, alpha=0.3, train=1000, normali
     # Train the neural network using vsom_r
     # from datetime import datetime
     # now = datetime.now()
-    neurons_array = vsom_opt(data, xdim, ydim, alpha, train)
+    neurons_array = vsom(data, xdim, ydim, alpha, train)
     # print(datetime.now()-now)
     neurons = pd.DataFrame(neurons_array, columns=data.columns)
     

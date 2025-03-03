@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='popsom7',
-    version='7.1.0',
+    version='7.1.1',
     author='Lutz Hamel',
     author_email='lutz.hamel@gmail.com',
     description="A Fast, User-friendly Implementation of Self-Organizing Maps (SOMs)",
