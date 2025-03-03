@@ -63,3 +63,6 @@ Here is a simple example written in the sklearn compatible API,
 
 * [R notebook on Kaggle](https://www.kaggle.com/lutzhamel/customer-segmentation-with-soms).
 
+## Github 
+
+[Project Page](https://github.com/lutzhamel/popsom7)
