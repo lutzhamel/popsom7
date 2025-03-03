@@ -17,6 +17,8 @@ A fast, user-friendly implementation of self-organizing maps (SOMs) with a numbe
 
 1. A number of easily accessible quality metrics.
 
+1. An implementation of the training algorithm based on tensor algebra.
+
 
 ## Installation
 
