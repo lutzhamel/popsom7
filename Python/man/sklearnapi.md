@@ -1,8 +1,11 @@
-# SOM: scikit-learn Style Wrapper for Self-Organizing Maps
+<!-- 
+convert this document to pdf with: pandoc -f markdown -t pdf -o sklearnapi.pdf sklearnapi.md
+-->
+# sklearnapi: scikit-learn Style Module for Self-Organizing Maps
 
-## Description
+## Description - The SOM Class
 
-The `SOM` class is a scikit-learn compatible estimator that wraps the self-organizing map (SOM) routines defined in `map_utils.py`. It builds a SOM from the training data and—if labels (`y`) are provided—uses them for reporting (for example, via majority voting within clusters). In the absence of labels, clusters are assigned numeric labels automatically.
+The `SOM` class in this module is a scikit-learn compatible estimator that wraps the self-organizing map (SOM) routines defined in the [maputils module](https://lutzhamel.github.io/popsom7/Python/man/maputils.pdf). It builds a SOM from the training data and if labels (`y`) are provided—uses them for reporting (for example, via majority voting within clusters). In the absence of labels, clusters are assigned numeric labels automatically.
 
 ## Usage
 
@@ -21,23 +24,11 @@ som = SOM(xdim=20, ydim=15, train=100000, seed=42)
 # Fit the SOM model
 som.fit(X, y)
 
-# Predict cluster labels
-print(som.predict(X).head())
-
-# Map samples to their (x, y) coordinates on the SOM grid
-print(som.transform(X).head())
-
 # Display a summary of training parameters and quality assessments
 som.summary()
 
-# Visualize the SOM using a starburst (heat map) representation
+# Visualize the SOM using a starburst representation
 som.starburst()
-
-# Compute the feature significances
-print(som.significance())
-
-# Display a density (marginal) plot for a specific feature
-som.marginal(2)
 ```
 
 ## Class Parameters
@@ -47,7 +38,7 @@ som.marginal(2)
 - **ydim** : *int, default=5*  
   Number of neurons along the y-dimension of the map.
 - **alpha** : *float, default=0.3*  
-  Learning rate, where 0 < alpha ≤ 1.
+  Learning rate, a value between 0 and 1.
 - **train** : *int, default=1000*  
   Number of training iterations.
 - **normalize** : *bool, default=False*  
@@ -58,7 +49,7 @@ som.marginal(2)
 ## Attributes
 
 - **som_map_** : *dict*  
-  The fitted SOM model.  For details on the map object check the documentation of the function `map_build` [here](https://lutzhamel.github.io/popsom7/Python/man/sklearnapi.html).
+  The fitted SOM model.  For details on the model check the documentation of the function [map_build](https://lutzhamel.github.io/popsom7/Python/man/maputils.pdf).
 
 ## Methods
 

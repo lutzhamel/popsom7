@@ -1,7 +1,10 @@
-# Popsom Python Interface Functions
+<!-- 
+convert this document to pdf with: pandoc -f markdown -t pdf -o maputils.pdf maputils.md
+-->
+# maputils: Popsom Python Interface Module
 
-This interface is modeled after the R interface to popsom.  For a more object-oriented
-approach see the documentation on the [sklearn API](https://lutzhamel.github.io/popsom7/Python/man/sklearnapi.html).
+This module is modeled after the R interface to popsom.  For a more object-oriented
+approach see the documentation on the [sklearn API](https://lutzhamel.github.io/popsom7/Python/man/sklearnapi.pdf).
 
 ## map_build
 

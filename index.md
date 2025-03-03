@@ -22,9 +22,9 @@ An implementation of self-organizing maps (SOMs) with a number of distinguishing
 
 1. An implementation of the training algorithm based on tensor algebra.
 
-## Example Code
+## Example Code in both Python and R
 
-Here is a simple example written in the sklearn compatible API,
+Here is a simple example written in Python using the sklearn compatible API,
 ```python
    from popsom7.sklearnapi import SOM
    import pandas as pd
@@ -42,17 +42,29 @@ Here is a simple example written in the sklearn compatible API,
 
    # Display the starburst (heat map) representation
    som.starburst()
+```
+Here is the same example written in R,
+```r
+# training data
+data(iris)
+df <- subset(iris,select=-Species)
+labels <- subset(iris,select=Species)
 
-   # Display feature significance and a marginal plots
-   print(som.significance())
-   som.marginal(2)
+# build a map
+m <- map.build(df,labels,xdim=20,ydim=15,train=100000,seed=42)
+
+# look at the characteristics of the maps
+map.summary(m)
+
+# plot the map
+map.starburst(m)
 ```
 
 ## Documentation
 
-* The documentation for the [sklearn compatible Python API](https://lutzhamel.github.io/popsom7/Python/man/sklearnapi.html).
+* The documentation for the [sklearn compatible Python API](https://lutzhamel.github.io/popsom7/Python/man/sklearnapi.pdf).
 
-* The documentation for the [Python API based on the R implementation](https://lutzhamel.github.io/popsom7/Python/man/maputils.html).
+* The documentation for the [Python API based on the R implementation](https://lutzhamel.github.io/popsom7/Python/man/maputils.pdf).
 
 * The [R documentation as part of CRAN](https://cran.r-project.org/web/packages/popsom7/popsom7.pdf).
 
