@@ -75,6 +75,12 @@ map.starburst(m)
 
 * [R notebook on Kaggle](https://www.kaggle.com/lutzhamel/customer-segmentation-with-soms).
 
+## Installation
+
+* To install popsom in Python head to the [PyPi website](https://pypi.org/) and search for 'popsom7'.
+
+* To install popsom in R head to the [CRAN website](https://cran.r-project.org/) and search for 'popsom7'.
+
 ## Github 
 
 [Project Page](https://github.com/lutzhamel/popsom7)
