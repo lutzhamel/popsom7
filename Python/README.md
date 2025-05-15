@@ -32,40 +32,42 @@ pip install popsom7
 Below is a quick example using the popsom `sklearnapi` interface.   
 
 ```python
-   from popsom7.sklearnapi import SOM
-   import pandas as pd
-   from sklearn import datasets
+from popsom7.sklearnapi import SOM
+import pandas as pd
+from sklearn import datasets
 
-   iris = datasets.load_iris()
-   X = pd.DataFrame(iris.data, columns=iris.feature_names)
-   y = pd.DataFrame(iris.target_names[iris.target],columns=['species'])
+iris = datasets.load_iris()
+X = pd.DataFrame(iris.data, columns=iris.feature_names)
+y = pd.DataFrame(iris.target_names[iris.target],columns=['species'])
 
-   # Create and fit the SOM model
-   som = SOM(xdim=20, ydim=15, train=100000, seed=42).fit(X, y)
+# Create and fit the SOM model
+som = SOM(xdim=20, ydim=15, train=100000, seed=42).fit(X, y)
 
-   # View a summary of the SOM
-   som.summary()
+# View a summary of the SOM
+som.summary()
 
-   # Display the starburst (heat map) representation
-   som.starburst()
+# Display the starburst (heat map) representation
+som.starburst()
 ```
 
 Here is the same example written in the API based on the R API.
 ```python
-   from sklearn import datasets
+from popsom7.maputils import map_build, map_summary, map_starburst
+import pandas as pd
+from sklearn import datasets   
 
-   iris = datasets.load_iris()
-   X = pd.DataFrame(iris.data, columns=iris.feature_names)
-   y = pd.DataFrame(iris.target_names[iris.target],columns=['species'])
+iris = datasets.load_iris()
+X = pd.DataFrame(iris.data, columns=iris.feature_names)
+y = pd.DataFrame(iris.target_names[iris.target],columns=['species'])
 
-   # Build the map
-   som_map = map_build(X, labels=y, xdim=20, ydim=15, train=100000, seed=42)
+# Build the map
+som_map = map_build(X, labels=y, xdim=20, ydim=15, train=100000, seed=42)
 
-   # View a summary of the SOM
-   map_summary(som_map)
+# View a summary of the SOM
+map_summary(som_map)
 
-   # Display the starburst (heat map) representation
-   map_starburst(som_map)
+# Display the starburst (heat map) representation
+map_starburst(som_map)
 ```
 
 For more details please see the [project homepage](https://github.com/lutzhamel/popsom7)

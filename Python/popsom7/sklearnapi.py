@@ -1,7 +1,13 @@
 from sklearn.base import BaseEstimator, ClusterMixin
 import pandas as pd
-from maputils import map_build, map_fitted, map_predict, map_position, \
-                     map_summary, map_starburst, map_significance, map_marginal
+from .maputils import (map_build, 
+                       map_fitted, 
+                       map_predict, 
+                       map_position,
+                       map_summary, 
+                       map_starburst, 
+                       map_significance, 
+                       map_marginal)
 
 class SOM(BaseEstimator, ClusterMixin):
     """
